@@ -1,0 +1,3 @@
+[submodule "ultra96/ultra96"]
+	path = ultra96/ultra96
+	url = https://github.com/tonydg2/ultra96.git
