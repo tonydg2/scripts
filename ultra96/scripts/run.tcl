@@ -1,11 +1,12 @@
-# tclsh run.tclh 
-# -run, -clean, -verbose
+# tclsh run.tcl
+# -proj, -clean, -verbose
+# -name, -no_bd
 
 set startTime [clock seconds]
 
-set VivadoPath "/media/tony/TDG_512/Xilinx/Vivado/2023.1"
+set VivadoPath "/media/tony/TDG_512/Xilinx/Vivado/2023.2"
 
-set TOP "TOP_BD_wrapper" ;# top entity name or image/bit file generated name...
+set TOP "top_bd_wrapper" ;# top entity name or image/bit file generated name...
 
 set genProj FALSE
 if {"-proj" in $argv} {
@@ -72,32 +73,38 @@ if {!$genProj} {
     set ghash_msb [string range $git_hash 0 7]
   }
 
-  set outputDirImage $outputDir/image 
+  #set outputDirImage $outputDir/image 
+  set outputDirImage $outputDir
   set buildFolder $timeStampVal\_$ghash_msb 
   file mkdir $outputDirImage/$buildFolder 
-  catch {file copy -force $outputDir/TOP_BD_wrapper.ltx $outputDirImage/$buildFolder/TOP_BD_wrapper.ltx} 
-  catch {file copy -force $outputDir/TOP_BD_wrapper.bit $outputDirImage/$buildFolder/TOP_BD_wrapper.bit}
-  catch {file copy -force $outputDir/TOP_BD_wrapper.xsa $outputDirImage/$buildFolder/TOP_BD_wrapper.xsa} 
+  catch {file rename -force $outputDir/top_bd_wrapper.ltx $outputDirImage/$buildFolder/top_bd_wrapper.ltx} ;# copy to rename 
+  catch {file rename -force $outputDir/top_bd_wrapper.bit $outputDirImage/$buildFolder/top_bd_wrapper.bit}
+  catch {file rename -force $outputDir/top_bd_wrapper.xsa $outputDirImage/$buildFolder/top_bd_wrapper.xsa}
+}
+
+puts "\n------------------------------------------"
+if {$genProj == TRUE && ($cmdErr == 0 || $cmdErr == "")} {
+  puts "** PROJECT GENERATION COMPLETE **"
+} else {
+  puts "** BUILD COMPLETE **"
+  puts "Timestamp: $timeStampVal"
+  puts "Git Hash: $ghash_msb"
 }
 
 set endTime     [clock seconds]
 set buildTime   [expr $endTime - $startTime]
 set buildMin    [expr $buildTime / 60]
 set buildSecRem [expr $buildTime % 60]
-puts "\n------------------------------------------"
-puts "Build Time: $buildMin min:$buildSecRem sec"
-puts "\n------------------------------------------"
-
-if {$genProj == TRUE && ($cmdErr == 0 || $cmdErr == "")} {
-  puts "*** PROJECT GENERATION COMPLETE"
-}
+puts "\nBuild Time: $buildMin min:$buildSecRem sec"
+puts "------------------------------------------"
 
 if {!$genProj} {
   set cleanFiles "tight_setup_hold_pins.txt cascaded_blocks.txt wdi_info.xml vivado.log"
   foreach x $cleanFiles {
     if {[file exists $x]} {
-      file copy -force $x $outputDir/
-      file delete -force $x
+      file rename -force $x $outputDir/
+      #file copy -force $x $outputDir/
+      #file delete -force $x
     }
   }
 }

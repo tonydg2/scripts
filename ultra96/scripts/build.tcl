@@ -5,7 +5,7 @@ set defaultProjName "prj0"
 set partNum "xczu3eg-sbva484-1-i"
 set evalKit "avnet.com:ultra96v2:part0:1.2"
 
-set topEntity "TOP_BD_wrapper"
+set topEntity "top_bd_wrapper"
 
 set outputDir ../output_products
 set hdlDir    ../hdl
@@ -61,13 +61,19 @@ if {!$genProj} {
 # HDL source
 #--------------------------------------------------------------------------------------------------
 
+read_verilog  $hdlDir/axis_stim_syn.sv 
+read_verilog  $hdlDir/axis_stim_syn_vwrap.v 
+
+
 read_verilog  $hdlDir/user_init_64b.sv 
 read_verilog  $hdlDir/user_init_64b_wrapper.v
+read_verilog  $hdlDir/user_init_64b_wrapper_zynq.v
 read_verilog  $hdlDir/axil_reg32.v
-##read_vhdl     $hdlDir/user_init_wrapper.vhd
-
+###read_vhdl     $hdlDir/user_init_wrapper.vhd
+#
 set_property used_in_simulation false [get_files $hdlDir/user_init_64b.sv]
 set_property used_in_simulation false [get_files $hdlDir/user_init_64b_wrapper.v]
+set_property used_in_simulation false [get_files $hdlDir/user_init_64b_wrapper_zynq.v]
 set_property used_in_simulation false [get_files $hdlDir/axil_reg32.v]
 
 
@@ -85,6 +91,11 @@ read_xdc $xdcDir/pins.xdc
 
 ##set_property top <TB file> [get_filesets sim_1]
 
+read_verilog  $simDir/axis_stim_syn_vwrap_tb.sv 
+
+set_property used_in_synthesis      false [get_files $simDir/axis_stim_syn_vwrap_tb.sv ]
+
+set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
 #--------------------------------------------------------------------------------------------------
 # Debug. Save project & quit. Source BD files manually.
 #--------------------------------------------------------------------------------------------------
@@ -123,10 +134,10 @@ if {"-no_bd" in $argv} {
 #--------------------------------------------------------------------------------------------------
 # Top level BD
 #--------------------------------------------------------------------------------------------------
-set bdFile        ".srcs/sources_1/bd/TOP_BD/TOP_BD.bd"
-set wrapperFile   ".gen/sources_1/bd/TOP_BD/hdl/TOP_BD_wrapper.v"
+set bdFile        ".srcs/sources_1/bd/top_bd/top_bd.bd"
+set wrapperFile   ".gen/sources_1/bd/top_bd/hdl/top_bd_wrapper.v"
 
-source ../bd/TOP_BD.tcl 
+source ../bd/top_bd.tcl 
 if {!$genProj} {
   set_property synth_checkpoint_mode None [get_files $bdFile]
 }
