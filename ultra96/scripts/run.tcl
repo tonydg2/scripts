@@ -77,9 +77,11 @@ if {!$genProj} {
   set outputDirImage $outputDir
   set buildFolder $timeStampVal\_$ghash_msb 
   file mkdir $outputDirImage/$buildFolder 
-  catch {file rename -force $outputDir/top_bd_wrapper.ltx $outputDirImage/$buildFolder/top_bd_wrapper.ltx} ;# copy to rename 
-  catch {file rename -force $outputDir/top_bd_wrapper.bit $outputDirImage/$buildFolder/top_bd_wrapper.bit}
-  catch {file rename -force $outputDir/top_bd_wrapper.xsa $outputDirImage/$buildFolder/top_bd_wrapper.xsa}
+  
+  #!! Uncomment these. Don't need for hobby projects only.
+  ###catch {file rename -force $outputDir/top_bd_wrapper.ltx $outputDirImage/$buildFolder/top_bd_wrapper.ltx} ;# copy to rename 
+  ###catch {file rename -force $outputDir/top_bd_wrapper.bit $outputDirImage/$buildFolder/top_bd_wrapper.bit}
+  ###catch {file rename -force $outputDir/top_bd_wrapper.xsa $outputDirImage/$buildFolder/top_bd_wrapper.xsa}
 }
 
 puts "\n------------------------------------------"
