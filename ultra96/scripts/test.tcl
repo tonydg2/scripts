@@ -1,10 +1,13 @@
+set VivadoPath "/media/tony/TDG_512/Xilinx/Vivado/2023.2"
 
-  set outputDir ../output_products
-  set outputDirImage $outputDir/image 
-  set buildFolder "test"
-  file mkdir $outputDirImage/$buildFolder 
-  catch {file copy -force $outputDir/TOP_BD_wrapper.ltx $outputDirImage/$buildFolder/TOP_BD_wrapper.ltx} 
-  catch {file copy -force $outputDir/TOP_BD_wrapper.bit $outputDirImage/$buildFolder/TOP_BD_wrapper.bit}
-  catch {file copy -force $outputDir/TOP_BD_wrapper.xsa $outputDirImage/$buildFolder/TOP_BD_wrapper.xsa} 
+set VivadoSettingsFile $VivadoPath/settings64.sh
+
+#if {[catch {exec sh -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} {
+#if {[catch {exec sh -c "source $VivadoSettingsFile" >@stdout} cmdErr]} {
+if {[catch {exec /bin/bash -c "source $VivadoSettingsFile;which vivado" >@stdout} cmdErr]} {
+  puts "\n\nERROR: FAILURE - Project\n\n$cmdErr\n"
+}
+
+
 
 

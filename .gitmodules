@@ -4,3 +4,6 @@
 [submodule "ultra96/axi_mcdma"]
 	path = ultra96/axi_mcdma
 	url = https://github.com/tonydg2/axi_mcdma.git
+[submodule "zc702/zc702"]
+	path = zc702/zc702
+	url = https://github.com/tonydg2/zc702.git
