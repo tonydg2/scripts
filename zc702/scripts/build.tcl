@@ -60,43 +60,93 @@ if {!$genProj} {
 #--------------------------------------------------------------------------------------------------
 # HDL source
 #--------------------------------------------------------------------------------------------------
+set vFiles    [glob -nocomplain $hdlDir/*.v]
+set svFiles   [glob -nocomplain $hdlDir/*.sv]
+set vhdFiles  [glob -nocomplain $hdlDir/*.vhd]
+if {$vFiles=="" && $svFiles=="" && $vhdFiles==""} {
+  puts "No files in directory \"$hdlDir\""
+}
+if {$vFiles !=""} {read_verilog $vFiles}
+if {$svFiles !=""} {read_verilog -sv $svFiles}
+if {$vhdFiles !=""} {read_verilog $vhdFiles}
 
-#read_verilog  $hdlDir/axis_stim_syn.sv 
-#read_verilog  $hdlDir/axis_stim_syn_vwrap.v
-read_verilog  $hdlDir/gen_pulse.sv
-read_verilog  $hdlDir/gen_pulse_wrapper.v
-read_verilog  $hdlDir/user_init_64b.sv 
-read_verilog  $hdlDir/user_init_64b_wrapper.v
-read_verilog  $hdlDir/user_init_64b_wrapper_zynq.v
-read_verilog  $hdlDir/axil_reg32.v
-###read_vhdl     $hdlDir/user_init_wrapper.vhd
-#
-set_property used_in_simulation false [get_files $hdlDir/user_init_64b.sv]
-set_property used_in_simulation false [get_files $hdlDir/user_init_64b_wrapper.v]
-set_property used_in_simulation false [get_files $hdlDir/user_init_64b_wrapper_zynq.v]
-set_property used_in_simulation false [get_files $hdlDir/axil_reg32.v]
+#set_property used_in_simulation false [get_files $hdlDir/user_init_64b.sv]
+#set_property used_in_simulation false [get_files $hdlDir/user_init_64b_wrapper.v]
+#set_property used_in_simulation false [get_files $hdlDir/user_init_64b_wrapper_zynq.v]
+#set_property used_in_simulation false [get_files $hdlDir/axil_reg32.v]
 
 
 #--------------------------------------------------------------------------------------------------
 # constraints
 #--------------------------------------------------------------------------------------------------
+set xdcFiles  [glob -nocomplain $xdcDir/*.xdc]
+if {$xdcFiles==""} {
+  puts "No files in directory \"$xdcFiles\""
+}
+if {$xdcFiles !=""} {read_xdc $xdcFiles}
 
-read_xdc $xdcDir/pins.xdc 
 
 #--------------------------------------------------------------------------------------------------
 # sim sources
 #--------------------------------------------------------------------------------------------------
 
 ##add_files -fileset sim_1 -norecurse $simDir/<TB file>.sv 
-
 ##set_property top <TB file> [get_filesets sim_1]
-
 #read_verilog  $simDir/axis_stim_syn_vwrap_tb.sv 
 #set_property used_in_synthesis      false [get_files $simDir/axis_stim_syn_vwrap_tb.sv ]
-read_verilog  $simDir/gen_pulse_tb.sv
-set_property used_in_synthesis  false [get_files $simDir/gen_pulse_tb.sv ]
 
-set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
+
+### Below will add the files with non-project commands
+#--------------------------------------------------------------------
+#set vFiles "";set svFiles "";set vhdFiles "";
+#set vFiles    [glob -nocomplain $simDir/*.v]
+#set svFiles   [glob -nocomplain $simDir/*.sv]
+#set vhdFiles  [glob -nocomplain $simDir/*.vhd]
+#if {$vFiles=="" && $svFiles=="" && $vhdFiles==""} {
+#  puts "No files in directory \"$simDir\""
+#}
+#if {$vFiles !=""} {
+#  read_verilog $vFiles
+#  set_property used_in_synthesis false [get_files $vFiles]
+#  set_property used_in_implementation false [get_files $vFiles]
+#}
+#if {$svFiles !=""} {
+#  read_verilog -sv $svFiles
+#  set_property used_in_synthesis false [get_files $svFiles]
+#  set_property used_in_implementation false [get_files $svFiles]
+#}
+#if {$vhdFiles !=""} {
+#  read_verilog $vhdFiles
+#  set_property used_in_synthesis false [get_files $svFiles]
+#  set_property used_in_implementation false [get_files $svFiles]
+#}
+
+#set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
+#--------------------------------------------------------------------
+
+
+#read_verilog  $simDir/gen_pulse_tb.sv
+#set_property used_in_synthesis  false [get_files $simDir/gen_pulse_tb.sv ]
+#set_property top gen_pulse_tb [get_filesets sim_1]
+
+
+
+if {$genProj} {
+  set vFiles "";set svFiles "";set vhdFiles "";
+  set vFiles    [glob -nocomplain $simDir/*.v]
+  set svFiles   [glob -nocomplain $simDir/*.sv]
+  set vhdFiles  [glob -nocomplain $simDir/*.vhd]
+  if {$vFiles=="" && $svFiles=="" && $vhdFiles==""} {
+    puts "No files in directory \"$simDir\""
+  }
+  if {$vFiles !=""} {add_files -fileset sim_1 -norecurse $vFiles}
+  if {$svFiles !=""} {add_files -fileset sim_1 -norecurse $svFiles}
+  if {$vhdFiles !=""} {add_files -fileset sim_1 -norecurse $vhdFiles}
+
+  #add_files -fileset sim_1 -norecurse /media/tony/TDG_512/projects/zc702_temp2/sim/dma_top_tb.sv
+
+  set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
+}
 #--------------------------------------------------------------------------------------------------
 # Debug. Save project & quit. Source BD files manually.
 #--------------------------------------------------------------------------------------------------
