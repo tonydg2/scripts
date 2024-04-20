@@ -1,9 +1,11 @@
 #!/bin/bash
 
+cwd=$(pwd)
+
 # Check if the input argument (directory) is provided
 if [ -z "$1" ]; then
     echo "Usage: $0 <directory-containing-git-repos>"
-    exit 1
+    echo "No search directory provided"
 fi
 
 # Navigate to the directory provided as an argument
@@ -18,3 +20,6 @@ for dir in */ ; do
         (cd "$dir" && git rev-parse --abbrev-ref HEAD)
     fi
 done
+
+cd $cwd
+
