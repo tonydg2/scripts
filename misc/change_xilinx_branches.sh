@@ -2,7 +2,7 @@
 
 cwd=$(pwd)
 
-BRANCH="rel-v2023.1"
+BRANCH="rel-v2023.2"
 
 cd sources/meta-openamp
 git checkout $BRANCH

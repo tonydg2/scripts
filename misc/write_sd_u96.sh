@@ -3,6 +3,7 @@
 # Check if the device path is provided
 if [ -z "$1" ]; then
     echo "Usage: $0 <device_path>"
+    echo "Example: $0 /dev/sdg"
     exit 1
 fi
 
