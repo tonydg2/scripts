@@ -1,6 +1,6 @@
 # vivado -mode batch -source build.tcl
 
-set defaultProjName "prj0"
+set defaultProjName "DEFAULT_PROJECT"
 
 set partNum "xczu3eg-sbva484-1-i"
 set evalKit "avnet.com:ultra96v2:part0:1.2"
@@ -53,6 +53,8 @@ set_property BOARD_PART $evalKit [current_project]
 ## source ip/<some ip>.tcl ;# get commands from gui manually
 ## set_property generate_synth_checkpoint 0 [get_files <some ip>.xci] ;# for ip instantiated in HDL
 
+#source ../bd/ip.tcl
+
 if {!$genProj} {
   ## generate_target all [get_files <some ip>.xci]
 }
@@ -61,10 +63,11 @@ if {!$genProj} {
 # HDL source
 #--------------------------------------------------------------------------------------------------
 
+read_verilog  $hdlDir/axil_if.sv 
+read_verilog  $hdlDir/axi_if.sv 
+
 read_verilog  $hdlDir/axis_stim_syn.sv 
 read_verilog  $hdlDir/axis_stim_syn_vwrap.v 
-
-
 read_verilog  $hdlDir/user_init_64b.sv 
 read_verilog  $hdlDir/user_init_64b_wrapper.v
 read_verilog  $hdlDir/user_init_64b_wrapper_zynq.v
@@ -84,30 +87,55 @@ set_property used_in_simulation false [get_files $hdlDir/axil_reg32.v]
 read_xdc $xdcDir/pins.xdc 
 
 #--------------------------------------------------------------------------------------------------
-# sim sources
+# sim sources 
+# TODO: move these to genProj, not needed for build only
 #--------------------------------------------------------------------------------------------------
 
 ##add_files -fileset sim_1 -norecurse $simDir/<TB file>.sv 
 
 ##set_property top <TB file> [get_filesets sim_1]
 
-read_verilog  $simDir/axis_stim_syn_vwrap_tb.sv 
+# moved to genProj
+#read_verilog  $simDir/axis_stim_syn_vwrap_tb.sv 
+#read_verilog  $simDir/axil_stim_dma.sv 
+#read_verilog  $simDir/mcdma_bd_tb.sv 
+#
+#set_property used_in_synthesis      false [get_files $simDir/axis_stim_syn_vwrap_tb.sv ]
+#set_property used_in_synthesis      false [get_files $simDir/axil_stim_dma.sv ]
+#set_property used_in_synthesis      false [get_files $simDir/mcdma_bd_tb.sv ]
+#
+#set_property used_in_implementation false [get_files $simDir/axis_stim_syn_vwrap_tb.sv ]
+#set_property used_in_implementation false [get_files $simDir/axil_stim_dma.sv ]
+#set_property used_in_implementation false [get_files $simDir/mcdma_bd_tb.sv ]
 
-set_property used_in_synthesis      false [get_files $simDir/axis_stim_syn_vwrap_tb.sv ]
 
-set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
 #--------------------------------------------------------------------------------------------------
 # Debug. Save project & quit. Source BD files manually.
 #--------------------------------------------------------------------------------------------------
 if {"-no_bd" in $argv} {
-  ##set_property -name {xsim.simulate.runtime}            -value {10 us}            -objects [get_filesets sim_1]
-  ##set_property -name {xsim.simulate.log_all_signals}    -value {true}             -objects [get_filesets sim_1]
-  ##set_property -name {xsim.compile.xvlog.more_options}  -value {-d SIM_SPEED_UP}  -objects [get_filesets sim_1]
-
   save_project_as $projName ../$projName -force
   close_project
   exit
 }
+
+#--------------------------------------------------------------------------------------------------
+# mcdma_bd
+#--------------------------------------------------------------------------------------------------
+# set mcdma_bd_bdFile       ".srcs/sources_1/bd/mcdma_bd/mcdma_bd.bd"
+# set mcdma_bd_wrapperFile  ".gen/sources_1/bd/mcdma_bd/hdl/mcdma_bd_wrapper.v"
+# source ../bd/mcdma_bd.tcl 
+# if {!$genProj} {
+#   set_property synth_checkpoint_mode None [get_files $mcdma_bd_bdFile]
+#   open_bd_design $mcdma_bd_bdFile
+#   generate_target all [get_files $mcdma_bd_bdFile]
+# }
+# 
+# # Put these in genProj as they are for sim only
+# #make_wrapper -files [get_files $mcdma_bd_bdFile] -top ;# leave as top, had issues without...
+# #read_verilog $mcdma_bd_wrapperFile
+# #set_property used_in_synthesis      false [get_files $mcdma_bd_wrapperFile]
+# #set_property used_in_implementation false [get_files $mcdma_bd_wrapperFile]
+# set_property source_mgmt_mode All [current_project]
 
 #--------------------------------------------------------------------------------------------------
 # <BDC1>
@@ -158,12 +186,39 @@ if {!$genProj} {
 #--------------------------------------------------------------------------------------------------
 
 if {$genProj} {
+
+# tb files
+  read_verilog  $simDir/axis_stim_syn_vwrap_tb.sv 
+  read_verilog  $simDir/axil_stim_dma.sv 
+  read_verilog  $simDir/mcdma_bd_tb.sv 
+
+  set_property used_in_synthesis      false [get_files $simDir/axis_stim_syn_vwrap_tb.sv ]
+  set_property used_in_synthesis      false [get_files $simDir/axil_stim_dma.sv ]
+  set_property used_in_synthesis      false [get_files $simDir/mcdma_bd_tb.sv ]
+
+  set_property used_in_implementation false [get_files $simDir/axis_stim_syn_vwrap_tb.sv ]
+  set_property used_in_implementation false [get_files $simDir/axil_stim_dma.sv ]
+  set_property used_in_implementation false [get_files $simDir/mcdma_bd_tb.sv ]
+
+  source ../sim/sim_ip.tcl
+
+# BDC files
+  #make_wrapper -files [get_files $mcdma_bd_bdFile] -top ;# leave as top, had issues without...
+  #read_verilog $mcdma_bd_wrapperFile
+  #set_property used_in_synthesis      false [get_files $mcdma_bd_wrapperFile]
+  #set_property used_in_implementation false [get_files $mcdma_bd_wrapperFile]
+
+
   # for sim
   ##set_property -name {xsim.simulate.runtime}            -value {10 us}            -objects [get_filesets sim_1]
   ##set_property -name {xsim.simulate.log_all_signals}    -value {true}             -objects [get_filesets sim_1]
   ##set_property -name {xsim.compile.xvlog.more_options}  -value {-d SIM_SPEED_UP}  -objects [get_filesets sim_1]
 
+  set_property -name {xsim.simulate.log_all_signals}  -value {true}   -objects [get_filesets sim_1]
+  set_property -name {xsim.simulate.runtime}          -value {100us}  -objects [get_filesets sim_1]
+
   ##add_files -fileset sim_1 -norecurse $simDir/<waveforms>.wcfg
+  #add_files -fileset sim_1 -norecurse $simDir/wcfg/*.wcfg
 
   set_property top $topEntity [current_fileset]
   save_project_as $projName ../$projName -force 
@@ -173,8 +228,10 @@ if {$genProj} {
 # Build
 #--------------------------------------------------------------------------------------------------
 if {!$genProj} {
+  #write_hw_platform -minimal -fixed -force -file $outputDir/PRESYNTH_$topEntity.xsa
+  
   synth_design -top $topEntity -part $partNum
-  write_checkpoint -force $outputDir/post_synth
+  #write_checkpoint -force $outputDir/post_synth
   #report_timing_summary
   #report_power
 
@@ -204,11 +261,18 @@ if {!$genProj} {
     set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]
     source ./load_git_hash.tcl
 
-    write_checkpoint    -force $outputDir/updated_post_route
+    write_checkpoint    -force $outputDir/post_route_UPDATED
     ##write_device_image ;# versal
-    write_bitstream     -force $outputDir/$topEntity  ;#may need to add .bit
-    write_debug_probes  -force $outputDir/$topEntity  ;#may need to add .ltx
-    write_hw_platform   -fixed -force -file $outputDir/$topEntity.xsa ;#may need to add .xsa
+    
+    # write_bitstream is performed during write_hw_platform, so avoid doing it twice. tcllib is used in run.tcl
+    # to unzip XSA and extract bit file for convenience. This is here in case tcllib isn't installed.
+    if {"tcllib_false" in $argv} {
+      #puts "\n\n \t\tTCLLIB_FALSE WRITE_BITSTREAM\n\n";# debug DELETE
+      write_bitstream     -force $outputDir/$topEntity
+    }
+    
+    write_debug_probes  -force $outputDir/$topEntity  ;#
+    write_hw_platform   -include_bit -fixed -force $outputDir/$topEntity.xsa
   }
   close_project -delete
 } else {
