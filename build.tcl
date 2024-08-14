@@ -121,21 +121,21 @@ if {"-no_bd" in $argv} {
 #--------------------------------------------------------------------------------------------------
 # mcdma_bd
 #--------------------------------------------------------------------------------------------------
-# set mcdma_bd_bdFile       ".srcs/sources_1/bd/mcdma_bd/mcdma_bd.bd"
-# set mcdma_bd_wrapperFile  ".gen/sources_1/bd/mcdma_bd/hdl/mcdma_bd_wrapper.v"
-# source ../bd/mcdma_bd.tcl 
-# if {!$genProj} {
-#   set_property synth_checkpoint_mode None [get_files $mcdma_bd_bdFile]
-#   open_bd_design $mcdma_bd_bdFile
-#   generate_target all [get_files $mcdma_bd_bdFile]
-# }
-# 
-# # Put these in genProj as they are for sim only
-# #make_wrapper -files [get_files $mcdma_bd_bdFile] -top ;# leave as top, had issues without...
-# #read_verilog $mcdma_bd_wrapperFile
-# #set_property used_in_synthesis      false [get_files $mcdma_bd_wrapperFile]
-# #set_property used_in_implementation false [get_files $mcdma_bd_wrapperFile]
-# set_property source_mgmt_mode All [current_project]
+set mcdma_bd_bdFile       ".srcs/sources_1/bd/mcdma_bd/mcdma_bd.bd"
+set mcdma_bd_wrapperFile  ".gen/sources_1/bd/mcdma_bd/hdl/mcdma_bd_wrapper.v"
+source ../bd/mcdma_bd.tcl 
+if {!$genProj} {
+  set_property synth_checkpoint_mode None [get_files $mcdma_bd_bdFile]
+  open_bd_design $mcdma_bd_bdFile
+  generate_target all [get_files $mcdma_bd_bdFile]
+}
+
+# Put these in genProj as they are for sim only
+#make_wrapper -files [get_files $mcdma_bd_bdFile] -top ;# leave as top, had issues without...
+#read_verilog $mcdma_bd_wrapperFile
+#set_property used_in_synthesis      false [get_files $mcdma_bd_wrapperFile]
+#set_property used_in_implementation false [get_files $mcdma_bd_wrapperFile]
+set_property source_mgmt_mode All [current_project]
 
 #--------------------------------------------------------------------------------------------------
 # <BDC1>
@@ -203,10 +203,10 @@ if {$genProj} {
   source ../sim/sim_ip.tcl
 
 # BDC files
-  #make_wrapper -files [get_files $mcdma_bd_bdFile] -top ;# leave as top, had issues without...
-  #read_verilog $mcdma_bd_wrapperFile
-  #set_property used_in_synthesis      false [get_files $mcdma_bd_wrapperFile]
-  #set_property used_in_implementation false [get_files $mcdma_bd_wrapperFile]
+  make_wrapper -files [get_files $mcdma_bd_bdFile] -top ;# leave as top, had issues without...
+  read_verilog $mcdma_bd_wrapperFile
+  set_property used_in_synthesis      false [get_files $mcdma_bd_wrapperFile]
+  set_property used_in_implementation false [get_files $mcdma_bd_wrapperFile]
 
 
   # for sim
@@ -228,8 +228,7 @@ if {$genProj} {
 # Build
 #--------------------------------------------------------------------------------------------------
 if {!$genProj} {
-  #write_hw_platform -minimal -fixed -force -file $outputDir/PRESYNTH_$topEntity.xsa
-  
+
   synth_design -top $topEntity -part $partNum
   #write_checkpoint -force $outputDir/post_synth
   #report_timing_summary
