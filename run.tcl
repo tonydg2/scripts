@@ -2,7 +2,7 @@
 # -proj, -clean, -verbose
 # -name, -no_bd
 
-set VivadoPath "/mnt/TDG_512/xilinx/Vivado/2024.1"
+set VivadoPath "/mnt/TDG_512/xilinx/Vivado/2023.2"
 set VivadoSettingsFile $VivadoPath/settings64.sh
 set startTime [clock seconds]
 set TOP "top_bd_wrapper" ;# top entity name or image/bit file generated name...
