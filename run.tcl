@@ -134,7 +134,8 @@ puts "\nBuild Time: $buildMin min:$buildSecRem sec"
 puts "------------------------------------------"
 
 if {!$genProj} {
-  set cleanFiles "tight_setup_hold_pins.txt cascaded_blocks.txt wdi_info.xml vivado.log"
+  rm -rf .Xil 
+  set cleanFiles "tight_setup_hold_pins.txt cascaded_blocks.txt wdi_info.xml vivado.log clockInfo.txt"
   foreach x $cleanFiles {
     if {[file exists $x]} {
       file rename -force $x $outputDir/
