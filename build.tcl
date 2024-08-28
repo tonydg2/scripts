@@ -3,9 +3,13 @@
 set defaultProjName "DEFAULT_PROJECT"
 
 set partNum "xczu3eg-sbva484-1-i"
-set evalKit "avnet.com:ultra96v2:part0:1.2"
+#set evalKit "avnet.com:ultra96v2:part0:1.2"
 
-set topEntity "top_bd_wrapper"
+#set topEntity "top_io"
+#set topEntity "top_bd_wrapper"
+
+# Get top entity name from argv passed in by run.tcl
+set topEntity [lindex $argv [expr [lsearch -exact $argv TOP_ENTITY] + 1]]
 
 set outputDir ../output_products
 set hdlDir    ../hdl
@@ -38,7 +42,7 @@ create_project $projName -part $partNum -in_memory
 set_property target_language Verilog [current_project]
 set_property source_mgmt_mode All [current_project] 
 
-set_property BOARD_PART $evalKit [current_project]
+#set_property BOARD_PART $evalKit [current_project]
 
 # adding xilinx ip lib/repos:
 ## set ip_dir ../ip
@@ -63,9 +67,11 @@ if {!$genProj} {
 # HDL source
 #--------------------------------------------------------------------------------------------------
 
+read_verilog  $hdlDir/top_io.sv 
 read_verilog  $hdlDir/axil_if.sv 
 read_verilog  $hdlDir/axi_if.sv 
-
+read_verilog  $hdlDir/led_cnt.sv 
+read_verilog  $hdlDir/led_cnt_wrapper.v 
 read_verilog  $hdlDir/axis_stim_syn.sv 
 read_verilog  $hdlDir/axis_stim_syn_vwrap.v 
 read_verilog  $hdlDir/user_init_64b.sv 

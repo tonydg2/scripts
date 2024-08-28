@@ -5,7 +5,8 @@
 set VivadoPath "/mnt/TDG_512/xilinx/Vivado/2023.2"
 set VivadoSettingsFile $VivadoPath/settings64.sh
 set startTime [clock seconds]
-set TOP "top_bd_wrapper" ;# top entity name or image/bit file generated name...
+set TOP_ENTITY "top_io" ;# top entity name or image/bit file generated name...
+append argv " TOP_ENTITY $TOP_ENTITY";# for use in build.tcl
 
 puts "TCL Version : $tcl_version"
 if {("-h" in $argv) ||("-help" in $argv)} {
@@ -103,18 +104,24 @@ if {!$genProj} {
   set buildFolder $timeStampVal\_$ghash_msb 
   file mkdir $outputDirImage/$buildFolder 
 
+  # Stop and exit if no xsa
+  if {![file exists $outputDir/$TOP_ENTITY.xsa]} {puts "ERROR: $TOP_ENTITY.xsa not found!";exit}
+  
   # get bitstream from XSA
   if {$tcllib_found} {
-    ::zipfile::decode::unzipfile $outputDir/top_bd_wrapper.xsa $outputDir/xsa_temp
-    file copy -force $outputDir/xsa_temp/top_bd_wrapper.bit $outputDir/top_bd_wrapper.bit
+    ::zipfile::decode::unzipfile $outputDir/$TOP_ENTITY.xsa $outputDir/xsa_temp
+    # Stop and exit if no bit within xsa
+    if {![file exists $outputDir/xsa_temp/$TOP_ENTITY.bit]} {puts "ERROR: $TOP_ENTITY.bit not found in XSA!";exit}
+    file copy -force $outputDir/xsa_temp/$TOP_ENTITY.bit $outputDir/$TOP_ENTITY.bit
     file delete -force $outputDir/xsa_temp/
     puts "\n*** XSA embedded bitstream file successfully copied. ***"
   }
+  
 
   #!! Uncomment these. Don't need for hobby projects only.
-  ###catch {file rename -force $outputDir/top_bd_wrapper.ltx $outputDirImage/$buildFolder/top_bd_wrapper.ltx}
-  ###catch {file rename -force $outputDir/top_bd_wrapper.bit $outputDirImage/$buildFolder/top_bd_wrapper.bit}
-  ###catch {file rename -force $outputDir/top_bd_wrapper.xsa $outputDirImage/$buildFolder/top_bd_wrapper.xsa}
+  ###catch {file rename -force $outputDir/$TOP_ENTITY.ltx $outputDirImage/$buildFolder/$TOP_ENTITY.ltx}
+  ###catch {file rename -force $outputDir/$TOP_ENTITY.bit $outputDirImage/$buildFolder/$TOP_ENTITY.bit}
+  ###catch {file rename -force $outputDir/$TOP_ENTITY.xsa $outputDirImage/$buildFolder/$TOP_ENTITY.xsa}
 }
 
 puts "\n------------------------------------------"
