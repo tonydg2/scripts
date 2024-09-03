@@ -1,6 +1,9 @@
 # tclsh run.tcl
-# -proj, -clean, -verbose
-# -name, -no_bd
+# -clean                  ; removes generated files/folders in the scripts directory
+# -proj                   ; generate project only, if -name is not provided, default name is DEFAULT_PROJECT
+# -name <project_name>    ; name of project when -proj is used, projects with names beginning with PRJ will be ignored in git
+# -bd <bd tcl script name>; provide name of bd tcl script, if not used default is "top_bd". Debug only. BD internally must remain 'top_bd'.
+# -verbose, -no_bd        ; for debug
 
 set VivadoPath "/mnt/TDG_512/xilinx/Vivado/2023.2"
 set VivadoSettingsFile $VivadoPath/settings64.sh
@@ -15,6 +18,8 @@ if {("-h" in $argv) ||("-help" in $argv)} {
   puts "\t-clean : Clean build generated files and logs from scripts directory."
   puts "\t-verbose : Prints all tcl commands during build time."
   puts "\t-no_bd : For debug, create project with everything except adding block design or block design containers, to be added manually."
+  puts "\t-bd <BD TCL Script Name : Name of BD tcl script, default 'top_bd' if not specified. ** FOR DEBUG ONLY ** Top level BD must remain \n\
+        \t  'top_bd', this is only designed for tcl scripts with names differing from 'top_bd.tcl'"
   puts "\t-h, -help : Help."
   exit
 }

@@ -34,6 +34,20 @@ if {"-name" in $argv} {
   set projName $defaultProjName
 }
 
+if {"-bd" in $argv} {
+  set bdNameIdx [lsearch $argv "-bd"]
+  set bdNameIdx [expr $bdNameIdx + 1]
+  if {$bdNameIdx == $argc} {
+    set TOP_BD_TCL "top_bd"
+  } else {
+    set TOP_BD_TCL [lindex $argv $bdNameIdx]
+  }
+} else {
+  set TOP_BD_TCL "top_bd"
+}
+append TOP_BD_TCL ".tcl"
+puts "\n@@@ Building with top level block design script \"$TOP_BD_TCL\" @@@\n"
+
 #--------------------------------------------------------------------------------------------------
 # project
 #--------------------------------------------------------------------------------------------------
@@ -171,7 +185,8 @@ if {"-no_bd" in $argv} {
 set bdFile        ".srcs/sources_1/bd/top_bd/top_bd.bd"
 set wrapperFile   ".gen/sources_1/bd/top_bd/hdl/top_bd_wrapper.v"
 
-source ../bd/top_bd.tcl 
+#source ../bd/top_bd.tcl
+source ../bd/$TOP_BD_TCL
 if {!$genProj} {
   set_property synth_checkpoint_mode None [get_files $bdFile]
 }
