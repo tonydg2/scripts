@@ -48,6 +48,9 @@ if {"-bd" in $argv} {
 append TOP_BD_TCL ".tcl"
 puts "\n@@@ Building with top level block design script \"$TOP_BD_TCL\" @@@\n"
 
+# TODO:checks for bd tcl exist
+#source ../bd/$TOP_BD_TCL
+
 #--------------------------------------------------------------------------------------------------
 # project
 #--------------------------------------------------------------------------------------------------
