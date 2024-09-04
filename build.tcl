@@ -95,6 +95,7 @@ read_verilog  $hdlDir/user_init_64b.sv
 read_verilog  $hdlDir/user_init_64b_wrapper.v
 read_verilog  $hdlDir/user_init_64b_wrapper_zynq.v
 read_verilog  $hdlDir/axil_reg32.v
+read_verilog  $hdlDir/axil_reg32_A.v
 ###read_vhdl     $hdlDir/user_init_wrapper.vhd
 #
 set_property used_in_simulation false [get_files $hdlDir/user_init_64b.sv]
@@ -108,6 +109,7 @@ set_property used_in_simulation false [get_files $hdlDir/axil_reg32.v]
 #--------------------------------------------------------------------------------------------------
 
 read_xdc $xdcDir/pins.xdc 
+read_xdc $xdcDir/dfx.xdc 
 
 #--------------------------------------------------------------------------------------------------
 # sim sources 
