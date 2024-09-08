@@ -257,7 +257,10 @@ if {!$genProj} {
   #write_hw_platform -minimal -fixed -force -file $outputDir/PRESYNTH_$topEntity.xsa
   
   synth_design -top $topEntity -part $partNum
-  #write_checkpoint -force $outputDir/post_synth
+  write_checkpoint -force $outputDir/post_synth_STATIC
+    close_project -delete
+    exit
+    
   #report_timing_summary
   #report_power
 
