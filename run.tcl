@@ -64,6 +64,21 @@ if {$genProj} {
   puts "\n\n*** PROJECT GENERATION ONLY ***\n\n"
 }
 
+# DFX RMs -------------------------------------
+set runRMs 1
+if {$runRMs} {
+  if {"-verbose" in $argv} {
+    set buildCmd "vivado -mode batch -source ./RM_syn.tcl -nojournal -tclargs $argv" ;# is there a better way...?
+  } else {
+    set buildCmd "vivado -mode batch -source ./RM_syn.tcl -nojournal -notrace -tclargs $argv" 
+  }
+
+  if {[catch {exec /bin/bash -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} {
+    puts "DFX command error";exit;
+  }
+}
+# end DFX ------------------------------------------
+
 if {"-verbose" in $argv} {
   set buildCmd "vivado -mode batch -source ./build.tcl -nojournal -tclargs $argv" ;# is there a better way...?
 } else {
@@ -112,15 +127,15 @@ if {!$genProj} {
   # Stop and exit if no xsa
   if {![file exists $outputDir/$TOP_ENTITY.xsa]} {puts "ERROR: $TOP_ENTITY.xsa not found!";exit}
   
-  # get bitstream from XSA
-  if {$tcllib_found} {
-    ::zipfile::decode::unzipfile $outputDir/$TOP_ENTITY.xsa $outputDir/xsa_temp
-    # Stop and exit if no bit within xsa
-    if {![file exists $outputDir/xsa_temp/$TOP_ENTITY.bit]} {puts "ERROR: $TOP_ENTITY.bit not found in XSA!";exit}
-    file copy -force $outputDir/xsa_temp/$TOP_ENTITY.bit $outputDir/$TOP_ENTITY.bit
-    file delete -force $outputDir/xsa_temp/
-    puts "\n*** XSA embedded bitstream file successfully copied. ***"
-  }
+#  # get bitstream from XSA
+#  if {$tcllib_found} {
+#    ::zipfile::decode::unzipfile $outputDir/$TOP_ENTITY.xsa $outputDir/xsa_temp
+#    # Stop and exit if no bit within xsa
+#    if {![file exists $outputDir/xsa_temp/$TOP_ENTITY.bit]} {puts "ERROR: $TOP_ENTITY.bit not found in XSA!";exit}
+#    file copy -force $outputDir/xsa_temp/$TOP_ENTITY.bit $outputDir/$TOP_ENTITY.bit
+#    file delete -force $outputDir/xsa_temp/
+#    puts "\n*** XSA embedded bitstream file successfully copied. ***"
+#  }
   
 
   #!! Uncomment these. Don't need for hobby projects only.

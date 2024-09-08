@@ -255,14 +255,36 @@ if {$genProj} {
 #--------------------------------------------------------------------------------------------------
 if {!$genProj} {
   #write_hw_platform -minimal -fixed -force -file $outputDir/PRESYNTH_$topEntity.xsa
-  
+
+  # DFX-------------------------------------------------------------------
+#  set topRP       "led_cnt_pr"
+  set RM1         "led_cnt_A"
+  set RM2         "led_cnt_B"
+  set rpCell      "led_cnt_pr_inst"
+  set rmDir       "../RM_products"
+
+#  read_verilog  $hdlDir/$RM1.sv 
+#  synth_design -mode out_of_context -top $topRP -part $partNum
+#  write_checkpoint -force $outputDir/post_synth_$RM1.dcp
+#
+#  read_verilog  $hdlDir/$RM2.sv 
+#  synth_design -mode out_of_context -top $topRP -part $partNum
+#  write_checkpoint -force $outputDir/post_synth_$RM2.dcp
+  #-----------------------------------------------------------------------
+
   synth_design -top $topEntity -part $partNum
-  write_checkpoint -force $outputDir/post_synth_STATIC
-    close_project -delete
-    exit
+  write_checkpoint -force $outputDir/post_synth.dcp
+#    close_project -delete
+#    puts "\n\n*******DONE DFX TEST\n\n"
+#    exit
     
   #report_timing_summary
   #report_power
+  
+  #open_checkpoint $outputDir/post_synth.dcp
+  #update_design -cell $rpCell -black_box
+  set_property HD.RECONFIGURABLE true [get_cells $rpCell]
+  read_checkpoint -cell $rpCell $rmDir/post_synth_$RM1.dcp
 
   opt_design
   place_design
@@ -270,7 +292,7 @@ if {!$genProj} {
   #write_checkpoint -force $outputDir/post_place
 
   route_design
-  write_checkpoint      -force $outputDir/post_route
+  write_checkpoint      -force $outputDir/post_route.dcp
   report_timing_summary -file $outputDir/timing_summary_post_route.rpt 
   #report_timing -sort_by group -max_paths 100 -path_type summary -file $outputDir/post_route_timing.rpt
   #report_clock_utilization   -file $outputDir/clk_util.rpt                         
@@ -278,11 +300,25 @@ if {!$genProj} {
   #report_power               -file $outputDir/power.rpt        
   #report_drc                 -file $outputDir/drc.rpt      
 
+  write_checkpoint  -cell $rpCell $outputDir/post_synth_$RM1.dcp
+  update_design     -cell $rpCell -black_box
+  lock_design       -level routing
+  write_checkpoint  -force $outputDir/static_route.dcp
+
+  open_checkpoint $outputDir/static_route.dcp
+  read_checkpoint -cell $rpCell $rmDir/post_synth_$RM2.dcp
+  opt_design
+  place_design
+  route_design
+  write_checkpoint $outputDir/config2_routed.dcp
+
+
   if [expr {[get_property SLACK [get_timing_paths -delay_type min_max]] < 0}] {
     puts "\n *****************************************************************"
     puts " ** TIMING FAILURE - EXIT"
     puts "*******************************************************************\n"
   } else {
+#    open_checkpoint $outputDir/static_route.dcp 
     open_checkpoint $outputDir/post_route.dcp 
     ## set githash_cells_path "usr_access_wrapper_inst/git_hash_hdl_inst"
 
@@ -290,18 +326,26 @@ if {!$genProj} {
     set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]
     source ./load_git_hash.tcl
 
-    write_checkpoint    -force $outputDir/post_route_UPDATED
+    write_checkpoint    -force $outputDir/static_route_UPDATED.dcp
     ##write_device_image ;# versal
     
     # write_bitstream is performed during write_hw_platform, so avoid doing it twice. tcllib is used in run.tcl
     # to unzip XSA and extract bit file for convenience. This is here in case tcllib isn't installed.
-    if {"tcllib_false" in $argv} {
-      #puts "\n\n \t\tTCLLIB_FALSE WRITE_BITSTREAM\n\n";# debug DELETE
-      write_bitstream     -force $outputDir/$topEntity
-    }
+#    if {"tcllib_false" in $argv} {
+#      #puts "\n\n \t\tTCLLIB_FALSE WRITE_BITSTREAM\n\n";# debug DELETE
+#      write_bitstream     -force $outputDir/$topEntity
+#    }
     
+    open_checkpoint $outputDir/static_route_UPDATED.dcp
+    write_bitstream -force $outputDir/config1
+
+    # partial bitstream of RM only
+    open_checkpoint $outputDir/config2_routed.dcp
+    write_bitstream -force -cell $rpCell $outputDir/RM_led_cnt_B_partial.bit
+
     write_debug_probes  -force $outputDir/$topEntity  ;#
-    write_hw_platform   -include_bit -fixed -force $outputDir/$topEntity.xsa
+    #write_hw_platform   -include_bit -fixed -force $outputDir/$topEntity.xsa
+    write_hw_platform   -fixed -force $outputDir/$topEntity.xsa
   }
   close_project -delete
 } else {
