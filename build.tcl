@@ -339,6 +339,10 @@ if {!$genProj} {
       # dfx notes bitstream
       # -no_partial_bitfile (full configuration but will not generate the partial bitstream associated with this config)
       # 
+      #  set rpCell      "led_cnt_pr_inst"
+      # set_property BITSTREAM.CONFIG.USR_ACCESS TIMESTAMP [current_design]
+      # set_property BITSTREAM.CONFIG.USR_ACCESS NONE [current_design]
+      # set_property BITSTREAM.CONFIG.USR_ACCESS NONE|0x<8-digit hex>|TIMESTAMP [current_design]
 
     open_checkpoint $outputDir/static_route_UPDATED.dcp
     write_bitstream -force $outputDir/config1
