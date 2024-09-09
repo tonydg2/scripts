@@ -336,6 +336,10 @@ if {!$genProj} {
 #      write_bitstream     -force $outputDir/$topEntity
 #    }
     
+      # dfx notes bitstream
+      # -no_partial_bitfile (full configuration but will not generate the partial bitstream associated with this config)
+      # 
+
     open_checkpoint $outputDir/static_route_UPDATED.dcp
     write_bitstream -force $outputDir/config1
 
