@@ -19,11 +19,16 @@ read_verilog  $hdlDir/axil_reg32.v
 read_verilog  $hdlDir/led_cnt.sv 
 read_verilog  $hdlDir/led_cnt_wrapper.v 
 read_verilog  $hdlDir/user_init_64b.sv 
-read_verilog  $hdlDir/user_init_64b_wrapper.v
+#read_verilog  $hdlDir/user_init_64b_wrapper.v
 read_verilog  $hdlDir/user_init_64b_wrapper_zynq.v
 
 source $bdDir/top_bd.tcl
 
+#--------------------------------------------------------------------------------------------------
+# TODO: have option to to full in-memory build. Also build with already generated BD project:
+# in-memory : ".srcs/..."
+# project   : ../$projName/$projName.srcs/...
+#   both need to work during later implementation...
 #--------------------------------------------------------------------------------------------------
 set bdFile        ".srcs/sources_1/bd/$topBD/$topBD.bd"
 set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
@@ -33,8 +38,9 @@ read_verilog $wrapperFile
 set_property synth_checkpoint_mode None [get_files $bdFile]
 generate_target all [get_files $bdFile]
 
-if {$genProj} {
-  save_project_as $projName ./$projName -force
-  set_property top [file rootname [file tail $wrapperFile]] [current_fileset]
- }
+#if {$genProj} {
+  set_property top [file rootname [file tail $wrapperFile]] [current_fileset]  
+  save_project_as $projName ../$projName -force
+#  
+#}
 

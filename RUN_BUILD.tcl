@@ -44,10 +44,29 @@ if {"-clean" in $argv} {cleanProc}
 #--------------------------------------------------------------------------------------------------
 #set RM_syn_args "$hdlDir $partNum \"$RMs\" $rmDir"
 #vivadoCmd2 "RM_syn.tcl" $argv $RM_syn_args;#support_procs.tcl
-vivadoCmd2 "RM_syn.tcl" $argv $hdlDir $partNum \"$RMs\" $rmDir $topRP;#support_procs.tcl THIS WORKS AS DESIRED
-exit
-vivadoCmd "build.tcl" $argv ;#support_procs.tcl
+if {!("-skipPR" in $argv)} {
+  vivadoCmd2 "RM_syn.tcl" $argv $hdlDir $partNum \"$RMs\" $rmDir $topRP;#support_procs.tcl THIS WORKS AS DESIRED
+}
 
+if {!("-skipBD" in $argv)} {
+  vivadoCmd "bd_gen.tcl" $argv ;#support_procs.tcl
+}
+
+if {!("-skipSYN" in $argv)} {
+  vivadoCmd "syn.tcl" $argv ;#support_procs.tcl
+}
+
+if {!("-skipIMP" in $argv)} {
+  vivadoCmd "imp.tcl" $argv ;#support_procs.tcl
+}
+
+if {!("-skipBIT" in $argv)} {
+  vivadoCmd "bit.tcl" $argv ;#support_procs.tcl
+}
+
+#vivadoCmd "build.tcl" $argv ;#support_procs.tcl
+
+puts "\n\nDONE DONE";exit
 #--------------------------------------------------------------------------------------------------
 # End of build stuff
 #--------------------------------------------------------------------------------------------------

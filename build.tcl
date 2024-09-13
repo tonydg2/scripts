@@ -300,7 +300,7 @@ if {!$genProj} {
   #report_power               -file $outputDir/power.rpt        
   #report_drc                 -file $outputDir/drc.rpt      
 
-  write_checkpoint  -cell $rpCell $outputDir/post_synth_$RM1.dcp
+  write_checkpoint  -cell $rpCell $outputDir/post_synth_$RM1.dcp ;# why post SYNTH? typo?
   update_design     -cell $rpCell -black_box
   lock_design       -level routing
   write_checkpoint  -force $outputDir/static_route.dcp

@@ -11,6 +11,8 @@ set RMs         [lindex $argv 2]
 set rmDir       [lindex $argv 3]  ;# output products dir
 set topRP       [lindex $argv 4]
 
+if {file exists $rmDir} {file delete -force $rmDir}
+
 foreach x $RMs {
   read_verilog  $hdlDir/$x.sv
   synth_design -mode out_of_context -top $topRP -part $partNum
