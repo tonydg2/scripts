@@ -1,0 +1,1 @@
+# synth script for non-DFX project, or for static portion of DFX project
