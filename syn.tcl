@@ -1,15 +1,15 @@
 # synth script for non-DFX project, or for static portion of DFX project
+# Args passed in for this script:$hdlDir $partNum $topBD $TOP_ENTITY $outputDir $xdcDir $projName
 
-set partNum   "xczu3eg-sbva484-1-i"
-set topEntity "top_io"
-
-set outputDir ../output_products
-set hdlDir    ../hdl
-set xdcDir    ../xdc 
-set simDir    ../sim 
+set hdlDir    [lindex $argv 0]
+set partNum   [lindex $argv 1]
+set topBD     [lindex $argv 2]
+set topEntity [lindex $argv 3]
+set outputDir [lindex $argv 4]
+set xdcDir    [lindex $argv 5]
+set projName  [lindex $argv 6]
 
 #set projName "DEFAULT_PROJECT"
-set projName  "PRJ3"
 
 read_verilog  $hdlDir/top_io.sv 
 read_verilog  $hdlDir/led_cnt.sv 
@@ -23,7 +23,6 @@ read_verilog  $hdlDir/axil_reg32_A.v
 read_xdc $xdcDir/pins.xdc 
 read_xdc $xdcDir/dfx.xdc 
 
-set topBD         "top_bd"
 #set bdFile        ".srcs/sources_1/bd/$topBD/$topBD.bd"
 #set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
 set bdFile        "../$projName/$projName.srcs/sources_1/bd/$topBD/$topBD.bd"

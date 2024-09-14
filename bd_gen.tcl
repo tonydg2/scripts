@@ -1,12 +1,12 @@
 # generate block design with associated dependencies
 # UG994, UG892
+# Args passed in for this script: hdlDir,partNum,bdDir,projName,topBD
 
-set bdDir   ../bd
-set hdlDir  ../hdl
-
-set partNum   "xczu3eg-sbva484-1-i"
-set projName  "PRJ3"
-set topBD     "top_bd"
+set hdlDir    [lindex $argv 0]
+set partNum   [lindex $argv 1]
+set bdDir     [lindex $argv 2]
+set projName  [lindex $argv 3]
+set topBD     [lindex $argv 4]
 
 set_part $partNum
 create_project $projName -part $partNum -in_memory
@@ -15,14 +15,14 @@ set_property TARGET_LANGUAGE Verilog [current_project]
 set_property DEFAULT_LIB work [current_project]
 set_property SOURCE_MGMT_MODE All [current_project]
 
+# TODO: folder parse or ???
 read_verilog  $hdlDir/axil_reg32.v
 read_verilog  $hdlDir/led_cnt.sv 
 read_verilog  $hdlDir/led_cnt_wrapper.v 
 read_verilog  $hdlDir/user_init_64b.sv 
-#read_verilog  $hdlDir/user_init_64b_wrapper.v
 read_verilog  $hdlDir/user_init_64b_wrapper_zynq.v
 
-source $bdDir/top_bd.tcl
+source $bdDir/$topBD.tcl
 
 #--------------------------------------------------------------------------------------------------
 # TODO: have option to to full in-memory build. Also build with already generated BD project:

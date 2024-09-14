@@ -3,36 +3,30 @@
 #--------------------------------------------------------------------------------------------------
 # Vivado command
 #--------------------------------------------------------------------------------------------------
-proc vivadoCmd {fileName argv} {
-  upvar VivadoPath VivadoPath
-  set   VivadoSettingsFile $VivadoPath/settings64.sh
-  # move this somewhere else? don't need to repeat every command
-  if {![file exist $VivadoPath]} {
-    puts "ERROR - Check Vivado install path.\n\"$VivadoPath\" DOES NOT EXIST"
-    exit
-  }
+#proc vivadoCmd {fileName argv} {
+#  upvar VivadoPath VivadoPath
+#  set   VivadoSettingsFile $VivadoPath/settings64.sh
+#  # move this somewhere else? don't need to repeat every command
+#  if {![file exist $VivadoPath]} {
+#    puts "ERROR - Check Vivado install path.\n\"$VivadoPath\" DOES NOT EXIST"
+#    exit
+#  }
+#
+#  if {"-verbose" in $argv} {
+#    set buildCmd "vivado -mode batch -source $fileName -nojournal -tclargs $argv" ;# is there a better way...?
+#  } else {
+#    set buildCmd "vivado -mode batch -source $fileName -nojournal -notrace -tclargs $argv" 
+#  }
+#
+#  ## sh points to dash instead of bash by default in Ubuntu
+#  #if {[catch {exec sh -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} 
+#  if {[catch {exec /bin/bash -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} {
+#    puts "COMMAND ERROR:\n$cmdErr";exit;
+#  }
+#}
 
-  if {"-verbose" in $argv} {
-    set buildCmd "vivado -mode batch -source $fileName -nojournal -tclargs $argv" ;# is there a better way...?
-  } else {
-    set buildCmd "vivado -mode batch -source $fileName -nojournal -notrace -tclargs $argv" 
-  }
-
-  ## sh points to dash instead of bash by default in Ubuntu
-  #if {[catch {exec sh -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} 
-  if {[catch {exec /bin/bash -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} {
-    puts "COMMAND ERROR:\n$cmdErr";exit;
-  }
-}
-
-proc vivadoCmd2 {fileName argv args} {
-  upvar VivadoPath VivadoPath
-  set   VivadoSettingsFile $VivadoPath/settings64.sh
-  # move this somewhere else? don't need to repeat every command
-  if {![file exist $VivadoPath]} {
-    puts "ERROR - Check Vivado install path.\n\"$VivadoPath\" DOES NOT EXIST"
-    exit
-  }
+proc vivadoCmd {fileName argv args} {
+  upvar VivadoSettingsFile VivadoSettingsFile
 
   if {"-verbose" in $argv} {
     set buildCmd "vivado -mode batch -source $fileName -nojournal -tclargs $args" ;# is there a better way...?
@@ -46,7 +40,6 @@ proc vivadoCmd2 {fileName argv args} {
     puts "COMMAND ERROR:\n$cmdErr";exit;
   }
 }
-
 
 #--------------------------------------------------------------------------------------------------
 # 
@@ -74,9 +67,9 @@ proc cleanProc {} {
 }
 
 #--------------------------------------------------------------------------------------------------
-# parse log file for TIMESTAMP
+# parse log file for Xilinx generated TIMESTAMP
 #--------------------------------------------------------------------------------------------------
-proc getTimeStamp {} {
+proc getTimeStampXlnx {} {
   set searchVal "Overwriting \"TIMESTAMP\" with"
   set trimRVal "\" for option USR_ACCESS"
   set timeStampVal "FFFFFFFF"
@@ -154,4 +147,63 @@ proc outputDirGen {timeStampVal ghash_msb} {
   ###catch {file rename -force $outputDir/$TOP_ENTITY.ltx $outputDirImage/$buildFolder/$TOP_ENTITY.ltx}
   ###catch {file rename -force $outputDir/$TOP_ENTITY.bit $outputDirImage/$buildFolder/$TOP_ENTITY.bit}
   ###catch {file rename -force $outputDir/$TOP_ENTITY.xsa $outputDirImage/$buildFolder/$TOP_ENTITY.xsa}
+}
+
+#--------------------------------------------------------------------------------------------------
+# used for custom get time proc
+# Function to convert decimal numbers to hexadecimal strings with fixed digit length
+#--------------------------------------------------------------------------------------------------
+proc dec2hex {digits num} {
+  return [format "%0${digits}X" $num]
+}
+
+#--------------------------------------------------------------------------------------------------
+# get time custom, same format as xilinx USR_ACCESS TIMESTAMP 
+#--------------------------------------------------------------------------------------------------
+proc getTimeStamp {startTime} {
+  # Get the current time
+  #set now [clock seconds]
+  set now $startTime
+
+  # Extract date and time components and convert to integers
+  scan [clock format $now -format %d] %d dayNum
+  scan [clock format $now -format %m] %d monthNum
+  scan [clock format $now -format %Y] %d yearNum
+  scan [clock format $now -format %H] %d hourNum
+  scan [clock format $now -format %M] %d minuteNum
+  scan [clock format $now -format %S] %d secondNum
+
+  # Adjust the components as per your requirements
+  set day    [expr {$dayNum}]            ;# Days from 0 to 30 (5 bits)
+  set month  [expr {$monthNum}]          ;# Months from 0 to 11 (4 bits)
+  set year   [expr {$yearNum - 2000}]    ;# Years from 0 to 63 (6 bits)
+  set hour   $hourNum                    ;# Hours from 0 to 23 (5 bits)
+  set minute $minuteNum                  ;# Minutes from 0 to 59 (6 bits)
+  set second $secondNum                  ;# Seconds from 0 to 59 (6 bits)
+
+  # Ensure all values are within their expected ranges
+  foreach {var maxVal} {
+      day    30
+      month  11
+      year   63
+      hour   23
+      minute 59
+      second 59
+  } {
+      if {[set $var] > $maxVal || [set $var] < 0} {
+          error "$var is out of range (0-$maxVal). getTime proc in support_procs.tcl";exit
+      }
+  }
+
+  # Calculate the final 32-bit value by shifting and masking components
+  set finalValue [expr {
+      ((($day & 0x1F)    << 27) |
+      (($month  & 0xF)   << 23) |
+      (($year   & 0x3F)  << 17) |
+      (($hour   & 0x1F)  << 12) |
+      (($minute & 0x3F)  << 6)  |
+      ($second  & 0x3F))
+  }]
+  
+  return [format "%08X" $finalValue]
 }
