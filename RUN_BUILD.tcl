@@ -20,9 +20,11 @@ source support_procs.tcl
 set TOP_ENTITY  "top_io" ;# top entity name or image/bit file generated name...
 set partNum     "xczu3eg-sbva484-1-i"
 set hdlDir      "../hdl"
+set xdcDir      "../xdc"
 set outputDir   "../output_products"
 set bdDir       "../bd"
 set topBD       "top_bd"
+set projName    "PRJ3"
 
 #--------------------------------------------------------------------------------------------------
 # DFX vars for now, need better way to do this...
@@ -37,12 +39,19 @@ set RMs         "led_cnt_A \
 # Pre-build stuff
 #--------------------------------------------------------------------------------------------------
 # custom timestamp function instead of xilinx built-in. This ensures timestamp matches exactly
-# across bitstream configs
+# across bitstream configs when using PR
 set startTime [clock seconds]
 set buildTimeStamp [getTimeStamp $startTime]
 puts "\n*** BUILD TIMESTAMP: $buildTimeStamp ***\n"
 puts "TCL Version : $tcl_version"
 helpMsg $argv ;# support_procs.tcl
+
+set ghash_msb     [getGitHash]    ;# support_procs.tcl
+set partialBuild  [checkPartialBuild $argv] ;# support_procs.tcl
+
+if {!$partialBuild} {
+  outputDirGen $buildTimeStamp $ghash_msb $TOP_ENTITY ;# support_procs.tcl
+}
 
 set genProj FALSE
 if {"-proj" in $argv} {
@@ -50,7 +59,7 @@ if {"-proj" in $argv} {
   puts "\n\n*** PROJECT GENERATION ONLY ***\n\n"
 }
 
-if {"-clean" in $argv} {cleanProc}
+if {"-clean" in $argv} {cleanProc} ;# support_procs.tcl
 
 #--------------------------------------------------------------------------------------------------
 # vivado synth/impl commands
@@ -76,28 +85,24 @@ if {!("-skipIMP" in $argv)} {
 if {!("-skipBIT" in $argv)} {
   vivadoCmd "bit.tcl" $argv $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp
 }
-puts "\nDONE DONE\n";exit
+#puts "\nDONE DONE\n";exit
 #--------------------------------------------------------------------------------------------------
 # End of build stuff
 #--------------------------------------------------------------------------------------------------
-if {!$genProj} {
-#  set timeStampVal  [getTimeStampXlnx]  ;# support_procs.tcl
-  set timeStampVal  $buildTimeStamp
-  set ghash_msb     [getGitHash]    ;# support_procs.tcl
-  outputDirGen $timeStampVal $ghash_msb ;# support_procs.tcl
-}
+
+# check output_products folder at end, see outputDirGen
 
 puts "\n------------------------------------------"
 #if {$genProj == TRUE && ($cmdErr == 0 || $cmdErr == "")} 
-if {$genProj == TRUE}
+if {$genProj == TRUE} {
   puts "** PROJECT GENERATION COMPLETE **"
 } else {
   puts "** BUILD COMPLETE **"
-  puts "Timestamp: $timeStampVal"
+  puts "Timestamp: $buildTimeStamp"
   puts "Git Hash: $ghash_msb"
 }
 
 buildTimeEnd  ;# support_procs.tcl
 
-if {!$genProj} {cleanProc}
+if {!$genProj} {endCleanProc $outputDir} ;# support_procs.tcl
 

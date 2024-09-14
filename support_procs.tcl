@@ -44,6 +44,18 @@ proc vivadoCmd {fileName argv args} {
 #--------------------------------------------------------------------------------------------------
 # 
 #--------------------------------------------------------------------------------------------------
+proc checkPartialBuild {argv} {
+  if {("-skipPR" in $argv) |
+      ("-skipBD" in $argv) |
+      ("-skipSYN" in $argv) |
+      ("-skipIMP" in $argv) |
+      ("-skipBIT" in $argv)
+  } {return true} else {return false}
+}
+
+#--------------------------------------------------------------------------------------------------
+# 
+#--------------------------------------------------------------------------------------------------
 proc buildTimeEnd {} {
   upvar startTime startTime
   set endTime     [clock seconds]
@@ -52,18 +64,6 @@ proc buildTimeEnd {} {
   set buildSecRem [expr $buildTime % 60]
   puts "\nBuild Time: $buildMin min:$buildSecRem sec"
   puts "------------------------------------------"
-}
-
-#--------------------------------------------------------------------------------------------------
-# 
-#--------------------------------------------------------------------------------------------------
-proc cleanProc {} {
-  set cleanFiles "tight_setup_hold_pins.txt cascaded_blocks.txt wdi_info.xml vivado.log clockInfo.txt"
-  foreach x $cleanFiles {
-    if {[file exists $x]} {
-      file rename -force $x $outputDir/
-    }
-  }
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -115,19 +115,32 @@ proc helpMsg argv {
 }
 
 #--------------------------------------------------------------------------------------------------
-# 
+# cleans old generated files prior to build if previous failed/exited abnormaly
 #--------------------------------------------------------------------------------------------------
 proc cleanProc {} {
   puts "\nCLEANING TEMP FILES"
-  set dirs2Clean ".tmpCRC .Xil .srcs .gen"
+  set dirs2Clean ".tmpCRC .Xil .srcs .gen hd_visual clockInfo.txt"
   append files2Clean [glob -nocomplain *.log] " " [glob -nocomplain *.jou] $dirs2Clean
   foreach x $files2Clean {file delete -force $x}
 }
 
 #--------------------------------------------------------------------------------------------------
+# moves generated files into output dir at end of successful build
+#--------------------------------------------------------------------------------------------------
+proc endCleanProc {outputDir} {
+  set cleanFiles "tight_setup_hold_pins.txt cascaded_blocks.txt wdi_info.xml clockInfo.txt hd_visual"
+  append cleanFiles " " [glob -nocomplain *.log] " " [glob -nocomplain *.jou] $cleanFiles
+  file mkdir $outputDir/gen
+  foreach x $cleanFiles {
+    if {[file exists $x]} {
+      file rename -force $x $outputDir/gen/$x
+    }
+  }
+}
+#--------------------------------------------------------------------------------------------------
 # 
 #--------------------------------------------------------------------------------------------------
-proc outputDirGen {timeStampVal ghash_msb} {
+proc outputDirGen {timeStampVal ghash_msb TOP_ENTITY} {
   set outputDir ../output_products
   if {[file exists $outputDir]} {
     append newOutputDir $outputDir "_previous"
@@ -140,8 +153,9 @@ proc outputDirGen {timeStampVal ghash_msb} {
   set buildFolder $timeStampVal\_$ghash_msb 
   file mkdir $outputDirImage/$buildFolder 
 
+# TODO: below code needs to go in another proc that is called at end of full build
   # Stop and exit if no xsa
-  if {![file exists $outputDir/$TOP_ENTITY.xsa]} {puts "ERROR: $TOP_ENTITY.xsa not found!";exit}
+  #if {![file exists $outputDir/$TOP_ENTITY.xsa]} {puts "ERROR: $TOP_ENTITY.xsa not found!";exit}
 
   #!! Uncomment these. Don't need for hobby projects only.
   ###catch {file rename -force $outputDir/$TOP_ENTITY.ltx $outputDirImage/$buildFolder/$TOP_ENTITY.ltx}
