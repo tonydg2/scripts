@@ -138,6 +138,7 @@ proc endCleanProc {outputDir} {
 #--------------------------------------------------------------------------------------------------
 proc outputDirGen {timeStampVal ghash_msb TOP_ENTITY} {
   set outputDir ../output_products
+  set ghash_msb [string toupper $ghash_msb]
   if {[file exists $outputDir]} {
     append newOutputDir $outputDir "_previous"
     file delete -force $newOutputDir
@@ -146,8 +147,8 @@ proc outputDirGen {timeStampVal ghash_msb TOP_ENTITY} {
   file mkdir $outputDir
 
   set outputDirImage $outputDir
-  set buildFolder $timeStampVal\_$ghash_msb 
-  file mkdir $outputDirImage/$buildFolder 
+  set buildFolder $timeStampVal\_$ghash_msb
+  file mkdir $outputDirImage/$buildFolder
 
 # TODO: below code needs to go in another proc that is called at end of full build
   # Stop and exit if no xsa
