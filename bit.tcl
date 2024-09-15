@@ -1,4 +1,5 @@
 # bitstream gen
+# TODO: arg to create all configs, or static only, which RMs, etc...
 # Args passed in for this script: $TOP_ENTITY $outputDir $rpCell
 set topEntity [lindex $argv 0]
 set outputDir [lindex $argv 1]
@@ -11,13 +12,20 @@ open_checkpoint $dcpDir/static_route.dcp
 set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
 write_bitstream -force -no_partial_bitfile $outputDir/static ;# full static only
 
+# Only create full bitsream for first config
 set idx 1;
 foreach x $RMs {
-  open_checkpoint $dcpDir/config_$idx\_routed.dcp
-  set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
-  write_bitstream -force -no_partial_bitfile $outputDir/config_$idx
-  write_bitstream -force -cell $rpCell $outputDir/$x\_partial.bit
-  incr idx
+  if {$idx==1} {
+    open_checkpoint $dcpDir/config_$idx\_routed.dcp
+    set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
+    write_bitstream -force -no_partial_bitfile $outputDir/config_$idx
+    write_bitstream -force -cell $rpCell $outputDir/$x\_partial.bit
+    incr idx
+  } else {
+    open_checkpoint $dcpDir/config_$idx\_routed.dcp
+    write_bitstream -force -cell $rpCell $outputDir/$x\_partial.bit
+    incr idx
+  }
 }
 
 # this may need update

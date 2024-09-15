@@ -1,6 +1,7 @@
 # TODO: - move RM synth DCPs in output_products_RM into output_products in their own folder
 #       - separate bits and dcps in output_products in their own folders
-#       - 
+#       - maybe want to have synth RMs DCPs separate so as to be able to skip it
+#       -  * same with static...?
 
 # Top level build script
 # > tclsh RUN_BUILD.tcl
@@ -29,8 +30,7 @@ set outputDir   "../output_products"
 set dcpDir      "$outputDir/dcp"
 set bdDir       "../bd"
 set topBD       "top_bd"
-#set projName    "PRJ3" ;# need proc [getProjName $argv], return default or what's specified in argv
-set projName    [getProjName $argv $argc]
+set projName    [getProjName]
 #--------------------------------------------------------------------------------------------------
 # DFX vars for now, need better way to do this...
 #--------------------------------------------------------------------------------------------------
@@ -50,13 +50,13 @@ set startTime [clock seconds]
 set buildTimeStamp [getTimeStamp $startTime]
 puts "\n*** BUILD TIMESTAMP: $buildTimeStamp ***\n"
 puts "TCL Version : $tcl_version"
-helpMsg $argv ;# support_procs.tcl
+helpMsg ;# support_procs.tcl
 
 set ghash_msb     [getGitHash]    ;# support_procs.tcl
-set partialBuild  false;#[checkPartialBuild $argv] ;# support_procs.tcl 
+set partialBuild  false;#[checkPartialBuild] ;# support_procs.tcl 
 
 if {!$partialBuild} {
-  outputDirGen $buildTimeStamp $ghash_msb $TOP_ENTITY ;# support_procs.tcl
+  set imageFolder [outputDirGen] ;# support_procs.tcl
 }
 
 set genProj FALSE
@@ -73,30 +73,31 @@ if {"-clean" in $argv} {cleanProc} ;# support_procs.tcl
 #set RM_syn_args "$hdlDir $partNum \"$RMs\" $rmDir"
 #vivadoCmd2 "RM_syn.tcl" $argv $RM_syn_args;#support_procs.tcl
 if {!("-skipPR" in $argv)} {
-  vivadoCmd "RM_syn.tcl" $argv $hdlDir $partNum \"$RMs\" $rmDir $topRP;#support_procs.tcl THIS WORKS AS DESIRED
+  vivadoCmd "RM_syn.tcl" $hdlDir $partNum \"$RMs\" $rmDir $topRP;#support_procs.tcl THIS WORKS AS DESIRED
 }
 
 if {!("-skipBD" in $argv)} {
-  vivadoCmd "bd_gen.tcl" $argv $hdlDir $partNum $bdDir $projName $topBD
+  vivadoCmd "bd_gen.tcl" $hdlDir $partNum $bdDir $projName $topBD
 }
 
 if {!("-skipSYN" in $argv)} {
-  vivadoCmd "syn.tcl" $argv $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName
+  vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName
 }
 
 if {!("-skipIMP" in $argv)} {
-  vivadoCmd "imp.tcl" $argv \"$RMs\" $rmDir $dcpDir $rpCell
+  vivadoCmd "imp.tcl" \"$RMs\" $rmDir $dcpDir $rpCell
 }
 
 if {!("-skipBIT" in $argv)} {
-  vivadoCmd "bit.tcl" $argv $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp $dcpDir
+  vivadoCmd "bit.tcl" $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp $dcpDir
 }
 #puts "\nDONE DONE\n";exit
 #--------------------------------------------------------------------------------------------------
 # End of build stuff
 #--------------------------------------------------------------------------------------------------
 
-# check output_products folder at end, see outputDirGen
+# check output_products folder at end
+# packageImage ;# support_procs.tcl
 
 puts "\n------------------------------------------"
 #if {$genProj == TRUE && ($cmdErr == 0 || $cmdErr == "")} 
@@ -110,5 +111,5 @@ if {$genProj == TRUE} {
 
 buildTimeEnd  ;# support_procs.tcl
 
-if {!$genProj} {endCleanProc $outputDir} ;# support_procs.tcl
+if {!$genProj} {endCleanProc} ;# support_procs.tcl
 

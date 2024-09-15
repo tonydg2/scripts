@@ -3,8 +3,9 @@
 #--------------------------------------------------------------------------------------------------
 # Vivado command
 #--------------------------------------------------------------------------------------------------
-proc vivadoCmd {fileName argv args} {
+proc vivadoCmd {fileName args} {
   upvar VivadoSettingsFile VivadoSettingsFile
+  upvar argv argv
 
   if {"-verbose" in $argv} {
     set buildCmd "vivado -mode batch -source $fileName -nojournal -tclargs $args" ;# is there a better way...?
@@ -21,7 +22,9 @@ proc vivadoCmd {fileName argv args} {
 #--------------------------------------------------------------------------------------------------
 # 
 #--------------------------------------------------------------------------------------------------
-proc getProjName {argv argc} {
+proc getProjName {} {
+  upvar argv argv
+  upvar argc argc
   set defaultProjName "DEFAULT_PROJECT"
   if {"-name" in $argv} {
     set projNameIdx [lsearch $argv "-name"]
@@ -40,9 +43,10 @@ proc getProjName {argv argc} {
 #--------------------------------------------------------------------------------------------------
 # 
 #--------------------------------------------------------------------------------------------------
-proc checkPartialBuild {argv} {
-  if {("-skipPR" in $argv) |
-      ("-skipBD" in $argv) |
+proc checkPartialBuild {} {
+  upvar argv argv
+  if {("-skipPR"  in $argv) |
+      ("-skipBD"  in $argv) |
       ("-skipSYN" in $argv) |
       ("-skipIMP" in $argv) |
       ("-skipBIT" in $argv)
@@ -94,9 +98,10 @@ proc getGitHash {} {
 }
 
 #--------------------------------------------------------------------------------------------------
-# Using 'argv' directly as input was necessary, other custom name didn't work.
+# 
 #--------------------------------------------------------------------------------------------------
-proc helpMsg argv {
+proc helpMsg {} {
+    upvar argv argv
   if {("-h" in $argv) ||("-help" in $argv)} {
     puts "\t-proj : Generate project only."
     puts "\t-name <PROJECT_NAME> : Name of project (used with -proj). Default name used if not specified."
@@ -123,7 +128,8 @@ proc cleanProc {} {
 #--------------------------------------------------------------------------------------------------
 # moves generated files into output dir at end of successful build
 #--------------------------------------------------------------------------------------------------
-proc endCleanProc {outputDir} {
+proc endCleanProc {} {
+  upvar outputDir outputDir
   set cleanFiles "tight_setup_hold_pins.txt cascaded_blocks.txt wdi_info.xml clockInfo.txt hd_visual"
   append cleanFiles " " [glob -nocomplain *.log] " " [glob -nocomplain *.jou] $cleanFiles
   file mkdir $outputDir/gen
@@ -134,10 +140,14 @@ proc endCleanProc {outputDir} {
   }
 }
 #--------------------------------------------------------------------------------------------------
-# 
+# If output_products exists from previous build, keep and rename to previous, delete old previous
 #--------------------------------------------------------------------------------------------------
-proc outputDirGen {timeStampVal ghash_msb TOP_ENTITY} {
-  set outputDir ../output_products
+proc outputDirGen {} {
+  upvar outputDir outputDir
+  upvar buildTimeStamp timeStampVal
+  upvar ghash_msb ghash_msb
+  upvar TOP_ENTITY TOP_ENTITY
+
   set ghash_msb [string toupper $ghash_msb]
   if {[file exists $outputDir]} {
     append newOutputDir $outputDir "_previous"
@@ -145,19 +155,32 @@ proc outputDirGen {timeStampVal ghash_msb TOP_ENTITY} {
     file rename -force $outputDir $newOutputDir
   }
   file mkdir $outputDir
-
-  set outputDirImage $outputDir
   set buildFolder $timeStampVal\_$ghash_msb
-  file mkdir $outputDirImage/$buildFolder
+  file mkdir $outputDir/$buildFolder
 
-# TODO: below code needs to go in another proc that is called at end of full build
+  return "$outputDir/$buildFolder"
+
+}
+
+#--------------------------------------------------------------------------------------------------
+# TODO: this won't work yet
+# need 
+#--------------------------------------------------------------------------------------------------
+proc packageImage {} {
+  upvar outputDir outputDir
   # Stop and exit if no xsa
-  #if {![file exists $outputDir/$TOP_ENTITY.xsa]} {puts "ERROR: $TOP_ENTITY.xsa not found!";exit}
+  if {![file exists $outputDir/$TOP_ENTITY.xsa]} {puts "ERROR: $TOP_ENTITY.xsa not found!";exit}
 
-  #!! Uncomment these. Don't need for hobby projects only.
+  set bitFiles [glob -nocomplain *.bit]
+  foreach x $bitFiles {
+    file rename -force $outputDir/$x $outputDirImage/$buildFolder/$TOP_ENTITY.bit
+  }
+
+
   ###catch {file rename -force $outputDir/$TOP_ENTITY.ltx $outputDirImage/$buildFolder/$TOP_ENTITY.ltx}
   ###catch {file rename -force $outputDir/$TOP_ENTITY.bit $outputDirImage/$buildFolder/$TOP_ENTITY.bit}
   ###catch {file rename -force $outputDir/$TOP_ENTITY.xsa $outputDirImage/$buildFolder/$TOP_ENTITY.xsa}
+
 }
 
 #--------------------------------------------------------------------------------------------------
