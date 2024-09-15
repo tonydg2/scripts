@@ -1,11 +1,11 @@
 # synth script for non-DFX project, or for static portion of DFX project
-# Args passed in for this script:$hdlDir $partNum $topBD $TOP_ENTITY $outputDir $xdcDir $projName
+# Args passed in for this script:$hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName
 
 set hdlDir    [lindex $argv 0]
 set partNum   [lindex $argv 1]
 set topBD     [lindex $argv 2]
 set topEntity [lindex $argv 3]
-set outputDir [lindex $argv 4]
+set dcpDir    [lindex $argv 4]
 set xdcDir    [lindex $argv 5]
 set projName  [lindex $argv 6]
 
@@ -32,5 +32,5 @@ read_bd $bdFile
 read_verilog $wrapperFile
 
 synth_design -top $topEntity -part $partNum
-write_checkpoint -force $outputDir/synth.dcp
+write_checkpoint -force $dcpDir/static_synth.dcp
 

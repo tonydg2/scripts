@@ -1,3 +1,7 @@
+# TODO: - move RM synth DCPs in output_products_RM into output_products in their own folder
+#       - separate bits and dcps in output_products in their own folders
+#       - 
+
 # Top level build script
 # > tclsh RUN_BUILD.tcl
 
@@ -22,18 +26,20 @@ set partNum     "xczu3eg-sbva484-1-i"
 set hdlDir      "../hdl"
 set xdcDir      "../xdc"
 set outputDir   "../output_products"
+set dcpDir      "$outputDir/dcp"
 set bdDir       "../bd"
 set topBD       "top_bd"
-set projName    "PRJ3"
-
+#set projName    "PRJ3" ;# need proc [getProjName $argv], return default or what's specified in argv
+set projName    [getProjName $argv $argc]
 #--------------------------------------------------------------------------------------------------
 # DFX vars for now, need better way to do this...
 #--------------------------------------------------------------------------------------------------
-set rpCell      "led_cnt_pr_inst"
-set rmDir       "../output_products_RM"
-set topRP       "led_cnt_pr"
+set rpCell      "led_cnt_pr_inst" ;# reconfigurable partition instance name in static region
+set rmDir       $dcpDir;#"$outputDir/RM_synth" ;# ../output_products_RM;# output directory for reconfigurable modules DCPs
+set topRP       "led_cnt_pr"  ;# module name
 set RMs         "led_cnt_A \
-                 led_cnt_B"
+                 led_cnt_B \
+                 led_cnt_C" ;# file name of each reconfigurable module
 
 #--------------------------------------------------------------------------------------------------
 # Pre-build stuff
@@ -47,7 +53,7 @@ puts "TCL Version : $tcl_version"
 helpMsg $argv ;# support_procs.tcl
 
 set ghash_msb     [getGitHash]    ;# support_procs.tcl
-set partialBuild  [checkPartialBuild $argv] ;# support_procs.tcl
+set partialBuild  false;#[checkPartialBuild $argv] ;# support_procs.tcl 
 
 if {!$partialBuild} {
   outputDirGen $buildTimeStamp $ghash_msb $TOP_ENTITY ;# support_procs.tcl
@@ -75,15 +81,15 @@ if {!("-skipBD" in $argv)} {
 }
 
 if {!("-skipSYN" in $argv)} {
-  vivadoCmd "syn.tcl" $argv $hdlDir $partNum $topBD $TOP_ENTITY $outputDir $xdcDir $projName
+  vivadoCmd "syn.tcl" $argv $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName
 }
 
 if {!("-skipIMP" in $argv)} {
-  vivadoCmd "imp.tcl" $argv \"$RMs\" $rmDir $outputDir $rpCell
+  vivadoCmd "imp.tcl" $argv \"$RMs\" $rmDir $dcpDir $rpCell
 }
 
 if {!("-skipBIT" in $argv)} {
-  vivadoCmd "bit.tcl" $argv $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp
+  vivadoCmd "bit.tcl" $argv $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp $dcpDir
 }
 #puts "\nDONE DONE\n";exit
 #--------------------------------------------------------------------------------------------------

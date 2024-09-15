@@ -3,28 +3,6 @@
 #--------------------------------------------------------------------------------------------------
 # Vivado command
 #--------------------------------------------------------------------------------------------------
-#proc vivadoCmd {fileName argv} {
-#  upvar VivadoPath VivadoPath
-#  set   VivadoSettingsFile $VivadoPath/settings64.sh
-#  # move this somewhere else? don't need to repeat every command
-#  if {![file exist $VivadoPath]} {
-#    puts "ERROR - Check Vivado install path.\n\"$VivadoPath\" DOES NOT EXIST"
-#    exit
-#  }
-#
-#  if {"-verbose" in $argv} {
-#    set buildCmd "vivado -mode batch -source $fileName -nojournal -tclargs $argv" ;# is there a better way...?
-#  } else {
-#    set buildCmd "vivado -mode batch -source $fileName -nojournal -notrace -tclargs $argv" 
-#  }
-#
-#  ## sh points to dash instead of bash by default in Ubuntu
-#  #if {[catch {exec sh -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} 
-#  if {[catch {exec /bin/bash -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} {
-#    puts "COMMAND ERROR:\n$cmdErr";exit;
-#  }
-#}
-
 proc vivadoCmd {fileName argv args} {
   upvar VivadoSettingsFile VivadoSettingsFile
 
@@ -39,6 +17,24 @@ proc vivadoCmd {fileName argv args} {
   if {[catch {exec /bin/bash -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} {
     puts "COMMAND ERROR:\n$cmdErr";exit;
   }
+}
+#--------------------------------------------------------------------------------------------------
+# 
+#--------------------------------------------------------------------------------------------------
+proc getProjName {argv argc} {
+  set defaultProjName "DEFAULT_PROJECT"
+  if {"-name" in $argv} {
+    set projNameIdx [lsearch $argv "-name"]
+    set projNameIdx [expr $projNameIdx + 1]
+    if {$projNameIdx == $argc} {
+      set projName $defaultProjName
+    } else {
+      set projName [lindex $argv $projNameIdx]
+    }
+  } else {
+    set projName $defaultProjName
+  }
+  return $projName
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -188,8 +184,8 @@ proc getTimeStamp {startTime} {
   scan [clock format $now -format %S] %d secondNum
 
   # Adjust the components as per your requirements
-  set day    [expr {$dayNum}]            ;# Days from 0 to 30 (5 bits)
-  set month  [expr {$monthNum}]          ;# Months from 0 to 11 (4 bits)
+  set day    [expr {$dayNum}]            ;# Days from 1 to 31 (5 bits)
+  set month  [expr {$monthNum}]          ;# Months from 1 to 12 (4 bits)
   set year   [expr {$yearNum - 2000}]    ;# Years from 0 to 63 (6 bits)
   set hour   $hourNum                    ;# Hours from 0 to 23 (5 bits)
   set minute $minuteNum                  ;# Minutes from 0 to 59 (6 bits)
@@ -197,8 +193,8 @@ proc getTimeStamp {startTime} {
 
   # Ensure all values are within their expected ranges
   foreach {var maxVal} {
-      day    30
-      month  11
+      day    31
+      month  12
       year   63
       hour   23
       minute 59

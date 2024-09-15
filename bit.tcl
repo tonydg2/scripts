@@ -5,14 +5,15 @@ set outputDir [lindex $argv 1]
 set rpCell    [lindex $argv 2]
 set RMs       [lindex $argv 3]
 set buildTime [lindex $argv 4]
+set dcpDir    [lindex $argv 5]
 
-open_checkpoint $outputDir/static_route.dcp
+open_checkpoint $dcpDir/static_route.dcp
 set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
 write_bitstream -force -no_partial_bitfile $outputDir/static ;# full static only
 
 set idx 1;
 foreach x $RMs {
-  open_checkpoint $outputDir/config_$idx\_routed.dcp
+  open_checkpoint $dcpDir/config_$idx\_routed.dcp
   set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
   write_bitstream -force -no_partial_bitfile $outputDir/config_$idx
   write_bitstream -force -cell $rpCell $outputDir/$x\_partial.bit
