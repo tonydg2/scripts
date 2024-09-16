@@ -1,7 +1,6 @@
 # -clean -name  -skipRM  -skipBD  -skipSYN  -skipIMP  -skipBIT -noCleanImg
 #
-# TODO: - move RM synth DCPs in output_products_RM into output_products in their own folder
-#       - separate bits and dcps in output_products in their own folders
+# TODO: 
 #       - maybe want to have synth RMs DCPs separate so as to be able to skip it
 #       -  * same with static...?
 
