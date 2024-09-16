@@ -11,17 +11,23 @@ set projName  [lindex $argv 6]
 
 #set projName "DEFAULT_PROJECT"
 
-read_verilog  $hdlDir/top_io.sv 
-read_verilog  $hdlDir/led_cnt.sv 
-read_verilog  $hdlDir/led_cnt_wrapper.v 
-read_verilog  $hdlDir/user_init_64b.sv 
-read_verilog  $hdlDir/user_init_64b_wrapper_zynq.v
-read_verilog  $hdlDir/axil_reg32.v
-read_verilog  $hdlDir/axil_reg32_A.v
+set     filesVerilog            [glob -nocomplain -tails -directory $hdlDir *.v]
+append  filesVerilog        " " [glob -nocomplain -tails -directory $hdlDir *.sv]
+set     commonFilesVerilog      [glob -nocomplain -tails -directory $hdlDir/common *.v]
+append  commonFilesVerilog  " " [glob -nocomplain -tails -directory $hdlDir/common *.sv]
+set     filesXDC                [glob -nocomplain -tails -directory $xdcDir *.xdc]
 
-# implementation only
-read_xdc $xdcDir/pins.xdc 
-read_xdc $xdcDir/dfx.xdc 
+foreach x $filesVerilog {
+  read_verilog  $hdlDir/$x
+}
+
+foreach x $commonFilesVerilog {
+  read_verilog  $hdlDir/common/$x
+}
+
+foreach x $filesXDC {
+  read_xdc  $xdcDir/$x
+}
 
 #set bdFile        ".srcs/sources_1/bd/$topBD/$topBD.bd"
 #set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"

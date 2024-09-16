@@ -13,8 +13,23 @@ set topRP       [lindex $argv 4]
 
 #if {[file exists $rmDir]} {file delete -force $rmDir}
 
+if {$RMs==""} {
+  puts "\n*** No Reconfigurable Modules provided, contintinuing as NON-DFX PROJECT. ***\n"
+  return
+} else {
+  puts "\n***\nDFX PROJECT. Reconfigurable Modules for synthesis:\n$RMs\n***\n"
+}
+
+set     commonFilesVerilog      [glob -nocomplain -tails -directory $hdlDir/common *.v]
+append  commonFilesVerilog " "  [glob -nocomplain -tails -directory $hdlDir/common *.sv]
+
+foreach x $commonFilesVerilog {
+  read_verilog  $hdlDir/common/$x
+}
+
 foreach x $RMs {
-  read_verilog  $hdlDir/$x.sv
+  read_verilog  $hdlDir/RM0/$x.sv
   synth_design -mode out_of_context -top $topRP -part $partNum
   write_checkpoint -force $rmDir/RM_post_synth_$x.dcp
 }
+

@@ -39,13 +39,27 @@ proc getProjName {} {
   }
   return $projName
 }
+#--------------------------------------------------------------------------------------------------
+# TODO; add arg for primary RM to be built with first config?
+#--------------------------------------------------------------------------------------------------
+proc getRMs {} {
+  upvar hdlDir hdlDir
+  
+  set     filesVerilog      [glob -nocomplain -tails -directory $hdlDir/RM0 *.v]
+  append  filesVerilog " "  [glob -nocomplain -tails -directory $hdlDir/RM0 *.sv]
 
+  set files {} 
+  foreach x $filesVerilog {
+    lappend files [file rootname $x]
+  }
+  return [lsort $files] ;# default ascii sort
+}
 #--------------------------------------------------------------------------------------------------
 # 
 #--------------------------------------------------------------------------------------------------
 proc checkPartialBuild {} {
   upvar argv argv
-  if {("-skipPR"  in $argv) |
+  if {("-skipRM"  in $argv) |
       ("-skipBD"  in $argv) |
       ("-skipSYN" in $argv) |
       ("-skipIMP" in $argv) |
@@ -58,12 +72,21 @@ proc checkPartialBuild {} {
 #--------------------------------------------------------------------------------------------------
 proc buildTimeEnd {} {
   upvar startTime startTime
+  upvar buildTimeStamp buildTimeStamp
+  upvar ghash_msb ghash_msb
+  
   set endTime     [clock seconds]
   set buildTime   [expr $endTime - $startTime]
   set buildMin    [expr $buildTime / 60]
   set buildSecRem [expr $buildTime % 60]
+  
+  puts "\n------------------------------------------"
+  puts "** BUILD COMPLETE **"
+  puts "Timestamp: $buildTimeStamp"
+  puts "Git Hash: $ghash_msb"
   puts "\nBuild Time: $buildMin min:$buildSecRem sec"
   puts "------------------------------------------"
+
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -94,7 +117,7 @@ proc getGitHash {} {
     set git_hash  [exec git rev-parse HEAD]
     set ghash_msb [string range $git_hash 0 7]
   }
-  return $ghash_msb
+  return [string toupper $ghash_msb]
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -131,7 +154,8 @@ proc cleanProc {} {
 proc endCleanProc {} {
   upvar outputDir outputDir
   set cleanFiles "tight_setup_hold_pins.txt cascaded_blocks.txt wdi_info.xml clockInfo.txt hd_visual"
-  append cleanFiles " " [glob -nocomplain *.log] " " [glob -nocomplain *.jou] $cleanFiles
+  # append will not add spaces automatically, so must add them manually
+  append cleanFiles " " [glob -nocomplain *.log] " " [glob -nocomplain *.jou]
   file mkdir $outputDir/gen
   foreach x $cleanFiles {
     if {[file exists $x]} {
@@ -148,7 +172,6 @@ proc outputDirGen {} {
   upvar ghash_msb ghash_msb
   upvar TOP_ENTITY TOP_ENTITY
 
-  set ghash_msb [string toupper $ghash_msb]
   if {[file exists $outputDir]} {
     append newOutputDir $outputDir "_previous"
     file delete -force $newOutputDir

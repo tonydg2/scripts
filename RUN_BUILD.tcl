@@ -1,3 +1,5 @@
+# -clean -name  -skipRM  -skipBD  -skipSYN  -skipIMP  -skipBIT -noCleanImg
+#
 # TODO: - move RM synth DCPs in output_products_RM into output_products in their own folder
 #       - separate bits and dcps in output_products in their own folders
 #       - maybe want to have synth RMs DCPs separate so as to be able to skip it
@@ -37,10 +39,7 @@ set projName    [getProjName]
 set rpCell      "led_cnt_pr_inst" ;# reconfigurable partition instance name in static region
 set rmDir       $dcpDir;#"$outputDir/RM_synth" ;# ../output_products_RM;# output directory for reconfigurable modules DCPs
 set topRP       "led_cnt_pr"  ;# module name
-set RMs         "led_cnt_A \
-                 led_cnt_B \
-                 led_cnt_C" ;# file name of each reconfigurable module
-
+set RMs         [getRMs] ;#"led_cnt_A led_cnt_B";# led_cnt_C" ;# file name of each reconfigurable module
 #--------------------------------------------------------------------------------------------------
 # Pre-build stuff
 #--------------------------------------------------------------------------------------------------
@@ -53,9 +52,10 @@ puts "TCL Version : $tcl_version"
 helpMsg ;# support_procs.tcl
 
 set ghash_msb     [getGitHash]    ;# support_procs.tcl
-set partialBuild  false;#[checkPartialBuild] ;# support_procs.tcl 
+if {"-noCleanImg" in $argv} {
+  set cleanImageFolder false} else {set cleanImageFolder true}
 
-if {!$partialBuild} {
+if {$cleanImageFolder} {
   set imageFolder [outputDirGen] ;# support_procs.tcl
 }
 
@@ -72,7 +72,7 @@ if {"-clean" in $argv} {cleanProc} ;# support_procs.tcl
 #--------------------------------------------------------------------------------------------------
 #set RM_syn_args "$hdlDir $partNum \"$RMs\" $rmDir"
 #vivadoCmd2 "RM_syn.tcl" $argv $RM_syn_args;#support_procs.tcl
-if {!("-skipPR" in $argv)} {
+if {!("-skipRM" in $argv)} {
   vivadoCmd "RM_syn.tcl" $hdlDir $partNum \"$RMs\" $rmDir $topRP;#support_procs.tcl THIS WORKS AS DESIRED
 }
 
@@ -99,17 +99,10 @@ if {!("-skipBIT" in $argv)} {
 # check output_products folder at end
 # packageImage ;# support_procs.tcl
 
-puts "\n------------------------------------------"
-#if {$genProj == TRUE && ($cmdErr == 0 || $cmdErr == "")} 
-if {$genProj == TRUE} {
-  puts "** PROJECT GENERATION COMPLETE **"
-} else {
-  puts "** BUILD COMPLETE **"
-  puts "Timestamp: $buildTimeStamp"
-  puts "Git Hash: $ghash_msb"
-}
 
 buildTimeEnd  ;# support_procs.tcl
+endCleanProc
+cleanProc
 
-if {!$genProj} {endCleanProc} ;# support_procs.tcl
+#if {!$genProj} {endCleanProc} ;# support_procs.tcl
 
