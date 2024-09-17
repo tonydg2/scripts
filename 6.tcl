@@ -21,6 +21,9 @@ getDFXconfigs
 puts $RMs 
 puts $RPs 
 
+foreach x $RMs {
+  
+}
 
 #set RMs [getDFXconfigs]
 #puts $RMs
