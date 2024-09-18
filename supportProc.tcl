@@ -56,7 +56,8 @@ proc getDFXconfigs {} {
     set RParray($x) $filesVerilog 
 
     set RPname [lindex $rmModName 0]
-    set RPinstArray($x) "$RPname\_inst"
+    #set RPinstArray($x) "$RPname\_inst"
+    set RPinstArray($x) $RPname
 
   }
 
