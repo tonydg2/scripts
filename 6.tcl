@@ -9,7 +9,7 @@ proc printArray {} {
 }
 
 
-source supportProc.tcl
+source supportProc6.tcl
 set hdlDir "/mnt/TDG_512/projects/0_u96_dfx/hdl"
 set RMs ""
 set RPs ""
@@ -41,11 +41,14 @@ for {set idx 0} {$idx <$RPlen} {incr idx} {
     puts "synth_design -mode out_of_context -top $curPRmod -part $partNum"
     puts "write_checkpoint -force $rmDir/$curRPdir/$curRPdir\_post_synth_$x.dcp\n"
   }
-
-
-
 }
 
 puts "***"
 
 if {!("-skipRM" in $argv) & !($RRs == "")} {puts "execute"}
+
+puts $RPs 
+foreach {ignore x} $RPs {
+  puts $x
+}
+
