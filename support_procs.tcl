@@ -6,7 +6,6 @@
 proc vivadoCmd {fileName args} {
   upvar VivadoSettingsFile VivadoSettingsFile
   upvar argv argv
-
   if {"-verbose" in $argv} {
     set buildCmd "vivado -mode batch -source $fileName -nojournal -tclargs $args" ;# is there a better way...?
   } else {
@@ -159,7 +158,10 @@ proc endCleanProc {} {
   file mkdir $outputDir/gen
   foreach x $cleanFiles {
     if {[file exists $x]} {
-      file rename -force $x $outputDir/gen/$x
+      #file rename -force $x $outputDir/gen/$x
+      if {[catch {file rename -force $x $outputDir/gen/$x} err]} {
+        puts "WARNING. Problem in endCleanProc: $err"
+      }
     }
   }
 }
@@ -171,6 +173,7 @@ proc outputDirGen {} {
   upvar buildTimeStamp timeStampVal
   upvar ghash_msb ghash_msb
   upvar TOP_ENTITY TOP_ENTITY
+  upvar RPs RPs 
 
   if {[file exists $outputDir]} {
     append newOutputDir $outputDir "_previous"
@@ -178,11 +181,16 @@ proc outputDirGen {} {
     file rename -force $outputDir $newOutputDir
   }
   file mkdir $outputDir
+  file mkdir $outputDir/bit
   set buildFolder $timeStampVal\_$ghash_msb
   file mkdir $outputDir/$buildFolder
 
-  return "$outputDir/$buildFolder"
+  # "write_bitstream -force" won't create non-existent folders like write_checkpoint does
+  # remove this if xilinx version is ever fixed...?
+  set idx 0
+  foreach x $RPs {if {[expr {$idx % 2}] == 0 } {incr idx;file mkdir $outputDir/bit/$x ;continue} else {incr idx;continue}}
 
+  return "$outputDir/$buildFolder"
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -263,4 +271,104 @@ proc getTimeStamp {startTime} {
   }]
   
   return [format "%08X" $finalValue]
+}
+
+#--------------------------------------------------------------------------------------------------
+# helper for getDFXconfigs
+# parse hdl file to get module name
+#--------------------------------------------------------------------------------------------------
+proc findModuleName {fileName} {
+  set fid [open $fileName r]
+  set text [read $fid] 
+  close $fid 
+  if {[regexp -nocase {module\s+(\S+)} $text match moduleName]} {
+    return $moduleName
+  } else {
+    error "ERROR parsing for module name in $fileName. EXITING"
+  }
+}
+
+#--------------------------------------------------------------------------------------------------
+# helper for getDFXconfigs
+# every RM hdl file in a DFX directory (RM*,) must have identical module names. This verifies
+#--------------------------------------------------------------------------------------------------
+proc verifyModuleNames {moduleList} {
+  if {[llength $moduleList] <= 1} {return} ;# only one module so just return
+  set firstFile [lindex $moduleList 0] 
+  foreach modFile $moduleList {
+    if {$modFile ne $firstFile} {
+      error "ERROR: each module name in RM directories must be identical."
+    }
+  }
+  return
+}
+
+#--------------------------------------------------------------------------------------------------
+# get RPs, RMs, RP instance(s), etc.
+# parse RM* folders, each folder representing individual RPs
+#   -get RM name from file parsing each file in RM*
+#   -verify all modules same name, error if not
+#   -if no RM folders, or empty, no DFX
+#   - get RP name as RM name concat with "_inst"
+#       search static design for RP name to verify? or just assume...?
+#       > get_cells -hierarchical *module_name_inst*
+#       easy when in top file. needs to work in lower level instances
+# 
+# return/set rpCell, RMs, RPs
+#   need to loop through RPs (multiple DFX regions)
+#--------------------------------------------------------------------------------------------------
+proc getDFXconfigs {} {
+  upvar hdlDir hdlDir
+  upvar RMs RMs
+  upvar RPs RPs 
+  upvar RPlen RPlen
+  upvar MaxRMs MaxRMs
+  # first get all directories in hdl that have 'RM*' name
+  set RMDirs [glob -nocomplain -tails -directory $hdlDir -type d RM*]
+  if {$RMDirs==""} {return} ;# no RMs therefore no DFX - DONE
+
+  # now search each RM Dir to get RMs for each
+  foreach x $RMDirs {
+    set     filesVerilog      [glob -nocomplain -tails -directory $hdlDir/$x *.v]
+    append  filesVerilog " "  [glob -nocomplain -tails -directory $hdlDir/$x *.sv]
+    set filesVerilog [lsort $filesVerilog]
+    set rmModName ""
+    foreach vFile $filesVerilog {
+      append rmModName " " [findModuleName $hdlDir/$x/$vFile]
+    }
+    verifyModuleNames $rmModName ;# verify all match otherwise error/quit
+    if {[expr {[llength $filesVerilog] > $MaxRMs}]} {set MaxRMs [llength $filesVerilog]} ;# need number of RMs in RP that has the most RMs
+    set RParray($x) $filesVerilog 
+    set RPname [lindex $rmModName 0]
+    set RPinstArray($x) $RPname
+
+  }
+  set RMs [lsort -stride 2 -index 0 [array get RParray]]
+  set RPs [lsort -stride 2 -index 0 [array get RPinstArray]]
+  set RPlen [expr [llength $RMs]/2]
+}
+
+#--------------------------------------------------------------------------------------------------
+# prep for DFX RM synth runs, before running vivado command 
+# this loops through as if running synth, and error/quits if necessary DFX config/arrays are not
+# correct. Mostly for debug/check before running actual vivado command - faster for debug
+#--------------------------------------------------------------------------------------------------
+proc preSynthRMcheck {} {
+  upvar RMs RMs
+  upvar RPs RPs 
+  upvar RPlen RPlen 
+
+  #set RPlen [llength $RMs] 
+  if {[expr 2*$RPlen] ne [llength $RPs]} {error "RPs and RMs lengths don't match. EXITING"}
+  #set RPlen [expr $RPlen/2]
+  #puts $RPlen
+
+  # this loop is just running for the error check. will be repeated in RM synth script with actual build commands
+  for {set idx 0} {$idx <$RPlen} {incr idx} {
+    set curRPdir  [lindex $RPs [expr 2*$idx]]
+    if {$curRPdir ne [lindex $RMs [expr 2*$idx]]} {error "PROBLEM, STOPPING"}
+    #set curRPinst [lindex $RPs [expr 2*$idx + 1]]
+    #set curRMs    [lindex $RMs [expr 2*$idx + 1]]
+    #puts "Running $curRPdir, RP module $curRPinst, with RMs: $curRMs"
+  }
 }

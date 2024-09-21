@@ -38,7 +38,13 @@ set projName    [getProjName]
 set rpCell      "led_cnt_pr_inst" ;# reconfigurable partition instance name in static region
 set rmDir       $dcpDir;#"$outputDir/RM_synth" ;# ../output_products_RM;# output directory for reconfigurable modules DCPs
 set topRP       "led_cnt_pr"  ;# module name
-set RMs         [getRMs] ;#"led_cnt_A led_cnt_B";# led_cnt_C" ;# file name of each reconfigurable module
+#set RMs         [getRMs] 
+set RMs ""
+set RPs ""
+set RPlen ""
+set MaxRMs ""
+getDFXconfigs ;# support_procs.tcl
+
 #--------------------------------------------------------------------------------------------------
 # Pre-build stuff
 #--------------------------------------------------------------------------------------------------
@@ -65,14 +71,14 @@ if {"-proj" in $argv} {
 }
 
 if {"-clean" in $argv} {cleanProc} ;# support_procs.tcl
-
 #--------------------------------------------------------------------------------------------------
 # vivado synth/impl commands
 #--------------------------------------------------------------------------------------------------
 #set RM_syn_args "$hdlDir $partNum \"$RMs\" $rmDir"
 #vivadoCmd2 "RM_syn.tcl" $argv $RM_syn_args;#support_procs.tcl
-if {!("-skipRM" in $argv)} {
-  vivadoCmd "RM_syn.tcl" $hdlDir $partNum \"$RMs\" $rmDir $topRP;#support_procs.tcl THIS WORKS AS DESIRED
+if {!("-skipRM" in $argv) & !($RMs == "")} {
+  preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. But also sets RPlen. If this doesn't fail, safe to synth RMs.
+  vivadoCmd "RM_syn.tcl" $hdlDir $partNum \"$RMs\" $rmDir \"$RPs\" $RPlen;#$topRP;#support_procs.tcl THIS WORKS AS DESIRED
 }
 
 if {!("-skipBD" in $argv)} {
@@ -80,16 +86,17 @@ if {!("-skipBD" in $argv)} {
 }
 
 if {!("-skipSYN" in $argv)} {
-  vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName
+  vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName \"$RPs\"
 }
 
+# loop here for multiple RPs...? or in the script?
 if {!("-skipIMP" in $argv)} {
-  vivadoCmd "imp.tcl" \"$RMs\" $rmDir $dcpDir $rpCell
+  vivadoCmd "imp.tcl" \"$RMs\" $rmDir $dcpDir $rpCell \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs
 }
 
-if {!("-skipBIT" in $argv)} {
-  vivadoCmd "bit.tcl" $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp $dcpDir
-}
+#if {!("-skipBIT" in $argv)} {
+#  vivadoCmd "bit5.tcl" $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp $dcpDir
+#}
 #puts "\nDONE DONE\n";exit
 #--------------------------------------------------------------------------------------------------
 # End of build stuff
