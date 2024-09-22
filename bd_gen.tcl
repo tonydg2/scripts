@@ -2,6 +2,14 @@
 # UG994, UG892
 # Args passed in for this script: hdlDir,partNum,bdDir,projName,topBD
 
+proc readVerilog {dir} {
+  set     files     [glob -nocomplain -tails -directory $dir *.v]
+  append  files " " [glob -nocomplain -tails -directory $dir *.sv]
+  foreach x $files {
+    read_verilog  $dir/$x
+  }
+}
+
 set hdlDir    [lindex $argv 0]
 set partNum   [lindex $argv 1]
 set bdDir     [lindex $argv 2]
@@ -15,19 +23,8 @@ set_property TARGET_LANGUAGE Verilog [current_project]
 set_property DEFAULT_LIB work [current_project]
 set_property SOURCE_MGMT_MODE All [current_project]
 
-set     filesVerilog            [glob -nocomplain -tails -directory $hdlDir *.v]
-append  filesVerilog        " " [glob -nocomplain -tails -directory $hdlDir *.sv]
-set     commonFilesVerilog      [glob -nocomplain -tails -directory $hdlDir/common *.v]
-append  commonFilesVerilog  " " [glob -nocomplain -tails -directory $hdlDir/common *.sv]
-
-foreach x $filesVerilog {
-  read_verilog  $hdlDir/$x
-}
-
-foreach x $commonFilesVerilog {
-  read_verilog  $hdlDir/common/$x
-}
-
+readVerilog $hdlDir/bd 
+readVerilog $hdlDir/common 
 source $bdDir/$topBD.tcl
 
 #--------------------------------------------------------------------------------------------------

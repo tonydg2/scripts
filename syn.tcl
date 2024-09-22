@@ -1,6 +1,16 @@
 # synth script for non-DFX project, or for static portion of DFX project
 # Args passed in for this script:$hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName
 
+proc readVerilog {dir} {
+  set     files     [glob -nocomplain -tails -directory $dir *.v]
+  append  files " " [glob -nocomplain -tails -directory $dir *.sv]
+  foreach x $files {
+    puts "\n *** $dir/$x *** \n"
+    read_verilog  $dir/$x
+  }
+}
+
+
 set hdlDir    [lindex $argv 0]
 set partNum   [lindex $argv 1]
 set topBD     [lindex $argv 2]
@@ -13,20 +23,18 @@ set RPs       [lindex $argv 7]
 
 #set projName "DEFAULT_PROJECT"
 
-set     filesVerilog            [glob -nocomplain -tails -directory $hdlDir *.v]
-append  filesVerilog        " " [glob -nocomplain -tails -directory $hdlDir *.sv]
-set     commonFilesVerilog      [glob -nocomplain -tails -directory $hdlDir/common *.v]
-append  commonFilesVerilog  " " [glob -nocomplain -tails -directory $hdlDir/common *.sv]
+# top file synthesized first. there are black box modules (module definitions in addition to instances)
+# with these, if the top module that has these black boxes read first, if the actual module is read AFTER, 
+# it will overwrite the black box with the ACTUAL module. Otherwise, if the module is read first, then the top 
+# file where the module (blackbox) is defined, it will overwrite the actual module read first, and make it an 
+# empty black box.
+read_verilog $hdlDir/top/$topEntity.sv 
+
+readVerilog $hdlDir
+readVerilog $hdlDir/bd 
+readVerilog $hdlDir/common 
+
 set     filesXDC                [glob -nocomplain -tails -directory $xdcDir *.xdc]
-
-foreach x $filesVerilog {
-  read_verilog  $hdlDir/$x
-}
-
-foreach x $commonFilesVerilog {
-  read_verilog  $hdlDir/common/$x
-}
-
 foreach x $filesXDC {
   read_xdc  $xdcDir/$x
 }

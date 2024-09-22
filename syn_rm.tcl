@@ -16,7 +16,6 @@ set RPlen       [lindex $argv 5]
 #if {[file exists $rmDir]} {file delete -force $rmDir}
 #puts "\n***\nDFX PROJECT. Reconfigurable Modules for synthesis:\n$RMs\n***\n"
 
-
 # files common to RMs and static in common folder
 set     commonFilesVerilog      [glob -nocomplain -tails -directory $hdlDir/common *.v]
 append  commonFilesVerilog " "  [glob -nocomplain -tails -directory $hdlDir/common *.sv]

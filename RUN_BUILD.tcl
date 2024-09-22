@@ -78,13 +78,13 @@ if {"-clean" in $argv} {cleanProc} ;# support_procs.tcl
 #vivadoCmd2 "RM_syn.tcl" $argv $RM_syn_args;#support_procs.tcl
 if {!("-skipRM" in $argv) & !($RMs == "")} {
   preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. But also sets RPlen. If this doesn't fail, safe to synth RMs.
-  vivadoCmd "RM_syn.tcl" $hdlDir $partNum \"$RMs\" $rmDir \"$RPs\" $RPlen;#$topRP;#support_procs.tcl THIS WORKS AS DESIRED
+  vivadoCmd "syn_rm.tcl" $hdlDir $partNum \"$RMs\" $rmDir \"$RPs\" $RPlen;#$topRP;#support_procs.tcl THIS WORKS AS DESIRED
 }
 
 if {!("-skipBD" in $argv)} {
   vivadoCmd "bd_gen.tcl" $hdlDir $partNum $bdDir $projName $topBD
 }
-
+if {!($RPs == "")} {puts "\n\n**** RPs NOT EMPTY!!!!!!!!\n\n"}
 if {!("-skipSYN" in $argv)} {
   vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName \"$RPs\"
 }
