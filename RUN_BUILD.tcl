@@ -74,11 +74,9 @@ if {"-clean" in $argv} {cleanProc} ;# support_procs.tcl
 #--------------------------------------------------------------------------------------------------
 # vivado synth/impl commands
 #--------------------------------------------------------------------------------------------------
-#set RM_syn_args "$hdlDir $partNum \"$RMs\" $rmDir"
-#vivadoCmd2 "RM_syn.tcl" $argv $RM_syn_args;#support_procs.tcl
+
 if {!("-skipRM" in $argv) & !($RMs == "")} {
-  preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. But also sets RPlen. If this doesn't fail, safe to synth RMs.
-  vivadoCmd "RM_syn.tcl" $hdlDir $partNum \"$RMs\" $rmDir \"$RPs\" $RPlen;#$topRP;#support_procs.tcl THIS WORKS AS DESIRED
+  vivadoCmd "RM_syn.tcl" $hdlDir $partNum $rmDir 
 }
 
 if {!("-skipBD" in $argv)} {
@@ -86,18 +84,14 @@ if {!("-skipBD" in $argv)} {
 }
 
 if {!("-skipSYN" in $argv)} {
-  vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName \"$RPs\"
+  vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName
 }
 
 # loop here for multiple RPs...? or in the script?
 if {!("-skipIMP" in $argv)} {
-  vivadoCmd "imp.tcl" \"$RMs\" $rmDir $dcpDir $rpCell \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs
+  vivadoCmd "imp.tcl" $rmDir $dcpDir $outputDir $buildTimeStamp
 }
 
-#if {!("-skipBIT" in $argv)} {
-#  vivadoCmd "bit5.tcl" $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp $dcpDir
-#}
-#puts "\nDONE DONE\n";exit
 #--------------------------------------------------------------------------------------------------
 # End of build stuff
 #--------------------------------------------------------------------------------------------------

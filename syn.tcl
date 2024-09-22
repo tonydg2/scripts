@@ -8,7 +8,6 @@ set topEntity [lindex $argv 3]
 set dcpDir    [lindex $argv 4]
 set xdcDir    [lindex $argv 5]
 set projName  [lindex $argv 6]
-set RPs       [lindex $argv 7]
 
 
 #set projName "DEFAULT_PROJECT"
@@ -40,6 +39,10 @@ read_bd $bdFile
 read_verilog $wrapperFile
 
 synth_design -top $topEntity -part $partNum
-if {!($RPs=="")} {foreach {ignore RP} $RPs {set_property HD.RECONFIGURABLE true [get_cells $RP\_inst]}}
+
+set_property HD.RECONFIGURABLE true [get_cells led_cnt_pr_inst]
+set_property HD.RECONFIGURABLE true [get_cells led_cnt2_pr_inst]
+set_property HD.RECONFIGURABLE true [get_cells led_cnt3_pr_inst]
+
 write_checkpoint -force $dcpDir/static_synth.dcp
 

@@ -1,11 +1,4 @@
 # DFX
-- This version is automated. Verified on U96 with three RPs and three RMs each.
-- RMs must be in folders named RM* in hdl directory.
-- Each RM must have same module name.
-- RM folders are parsed to get module names.
-- RP instance in static region MUST be named "<RM module name>_inst"
-  - Ex. RM0 = "led_cnt_pr", instance in io_top must be "led_cnt_pr_inst".
-- Currently, only one full config is built. This will be the 'first' RM for each RP which are sorted ASCII.
-  - Empty static is also built, there is an option to disable this in 'imp.tcl'.
-  - All partial bitstreams are generated.
-- No VHDL. Verilog and systemverilog only.
+- This version is very MANUAL. Verified on U96 as-is.(3 RMs in RM0, 2 for RM1 and 1 for RM2) all hardcoded.
+This is mainly to assist in understanding all the loops in the automated version, or help in debug.
+- Meant only as reference.
