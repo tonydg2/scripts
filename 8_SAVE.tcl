@@ -87,7 +87,6 @@ puts "---"
 
 
 # this works!
-
 for {set config 0} {$config < $MaxRMs} {incr config} {
   set cfgName "CONFIG"
   #MaxRMs
@@ -124,10 +123,9 @@ for {set config 0} {$config < $MaxRMs} {incr config} {
   puts ""
 }
 
-
-
-
-
+set DFXrun true 
+set staticDFX true 
+if {$DFXrun && $staticDFX} {puts "tuuu"}
 
 
 
