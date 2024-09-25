@@ -3,7 +3,7 @@
 - RMs must be in folders named RM* in hdl directory.
 - Each RM must have same module name.
 - RM folders are parsed to get module names.
-- RP instance in static region MUST be named "<RM module name>_inst"
+- RP instance in static region MUST be named "\<RM module name>_inst"
   - Ex. RM0 = "led_cnt_pr", instance in io_top must be "led_cnt_pr_inst".
 - Currently, only one full config is built. This will be the 'first' RM for each RP which are sorted ASCII.
   - Empty static is not built, there is an option to enable this in 'imp.tcl'.
