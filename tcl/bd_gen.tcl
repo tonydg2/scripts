@@ -1,6 +1,7 @@
+# TODO: full in-memory project option?
+
 # generate block design with associated dependencies
 # UG994, UG892
-# Args passed in for this script: hdlDir,partNum,bdDir,projName,topBD
 
 proc readVerilog {dir} {
   set     files     [glob -nocomplain -tails -directory $dir *.v]

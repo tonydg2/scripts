@@ -1,8 +1,4 @@
-# implementation
-# required DCPs:  $dcpDir/static_synthsynth.dcp
-#                 $rmDir/post_synth_$x.dcp (all RMs)
-#
-# Args passed in for this script: $RMs(list) $rmDir $dcpDir $rpCell
+# implementation & bitstream(s)
 
 #--------------------------------------------------------------------------------------------------
 # proc for P&R commands
@@ -14,7 +10,7 @@ proc place_n_route {name} {
   route_design
   # update git hash for every config, TODO: add catch for instance existance
   #set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]
-  #source ./load_git_hash.tcl
+  #source ./tcl/load_git_hash.tcl
   #report_timing_summary -file $dcpDir/timing_summary_$name.rpt
 }
 
@@ -30,7 +26,7 @@ set outputDir [lindex $argv 4]
 set buildTime [lindex $argv 5]
 set MaxRMs    [lindex $argv 6]
 
-set staticDFX true ;# temporary - run empty static build for DFX runs? arg for this option?
+set staticDFX false ;# temporary - run empty static build for DFX runs? arg for this option?
 
 if {$RMs==""} {set DFXrun false} else {set DFXrun true}
 #--------------------------------------------------------------------------------------------------
@@ -63,7 +59,7 @@ for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i
   place_n_route $cfgName
   if {$config == 0} { ;# this is a full config run so need timestamp and githash
     set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
-    source ./load_git_hash.tcl                                                             
+    source ./tcl/load_git_hash.tcl                                                             
     set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
     write_checkpoint -force $dcpDir/$cfgName.dcp
     if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit} ;# write_bitstream won't create folder even with -force
@@ -103,7 +99,7 @@ if {$DFXrun && $staticDFX} {
   }
   lock_design -level routing                                                        
   set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
-  source ./load_git_hash.tcl                                                             
+  source ./tcl/load_git_hash.tcl                                                             
   set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
   if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit}
   write_bitstream   -force -no_partial_bitfile $outputDir/bit/static ;# static with empty RPs 
@@ -113,7 +109,7 @@ if {$DFXrun && $staticDFX} {
   puts "NON-DFX IMPLEMENTATION"
   place_n_route "static"                                                                  
   set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
-  source ./load_git_hash.tcl                                                             
+  source ./tcl/load_git_hash.tcl                                                             
   set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
   if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit}
   write_bitstream   -force -no_partial_bitfile $outputDir/bit/static                            
@@ -147,7 +143,7 @@ write_hw_platform   -fixed -force $outputDir/platform.xsa
 #report_drc                 -file $dcpDir/static_route_drc.rpt
 
 ###set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
-###source ./load_git_hash.tcl                                                             
+###source ./tcl/load_git_hash.tcl                                                             
 ###set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
 ###write_bitstream   -force -no_partial_bitfile $outputDir/static                            
 ###write_checkpoint  -force $dcpDir/static_route.dcp ;# complete checkpoint if non-DFX run 
@@ -155,7 +151,7 @@ write_hw_platform   -fixed -force $outputDir/platform.xsa
 
 #  open_checkpoint $dcpDir/post_route.dcp ;# should this be static_route?
 #  set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*] ;# do this on the the first (post_route/config1) so later will be based on it...
-#  source ./load_git_hash.tcl
+#  source ./tcl/load_git_hash.tcl
 #  # this is just config1 updated with githash, need to do this with static too.
 #  # need to do this with static and ALL configs... or they won't have the githash...
 #  write_checkpoint -force $dcpDir/static_route_UPDATED.dcp ;

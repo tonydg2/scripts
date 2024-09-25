@@ -7,9 +7,9 @@ proc vivadoCmd {fileName args} {
   upvar VivadoSettingsFile VivadoSettingsFile
   upvar argv argv
   if {"-verbose" in $argv} {
-    set buildCmd "vivado -mode batch -source $fileName -nojournal -tclargs $args" ;# is there a better way...?
+    set buildCmd "vivado -mode batch -source tcl/$fileName -nojournal -tclargs $args" ;# is there a better way...?
   } else {
-    set buildCmd "vivado -mode batch -source $fileName -nojournal -notrace -tclargs $args" 
+    set buildCmd "vivado -mode batch -source tcl/$fileName -nojournal -notrace -tclargs $args" 
   }
 
   ## sh points to dash instead of bash by default in Ubuntu
@@ -19,7 +19,7 @@ proc vivadoCmd {fileName args} {
   }
 }
 #--------------------------------------------------------------------------------------------------
-# 
+# project name follows directly after '-name' input arg
 #--------------------------------------------------------------------------------------------------
 proc getProjName {} {
   upvar argv argv
@@ -81,8 +81,8 @@ proc buildTimeEnd {} {
   
   puts "\n------------------------------------------"
   puts "** BUILD COMPLETE **"
-  puts "Timestamp: $buildTimeStamp"
   puts "Git Hash: $ghash_msb"
+  puts "Timestamp: $buildTimeStamp"
   puts "\nBuild Time: $buildMin min:$buildSecRem sec"
   puts "------------------------------------------"
 
@@ -181,24 +181,22 @@ proc outputDirGen {} {
     file rename -force $outputDir $newOutputDir
   }
   file mkdir $outputDir
-  #file mkdir $outputDir/bit
   set buildFolder $timeStampVal\_$ghash_msb
   file mkdir $outputDir/$buildFolder
-
-  # "write_bitstream -force" won't create non-existent folders like write_checkpoint does
-  # remove this if xilinx version is ever fixed...?
-  #set idx 0
-  #foreach x $RPs {if {[expr {$idx % 2}] == 0 } {incr idx;file mkdir $outputDir/bit/$x ;continue} else {incr idx;continue}}
 
   return "$outputDir/$buildFolder"
 }
 
 #--------------------------------------------------------------------------------------------------
-# TODO: this won't work yet
+# TODO: not tested this won't work yet
 # need 
 #--------------------------------------------------------------------------------------------------
 proc packageImage {} {
   upvar outputDir outputDir
+  upvar imageFolder imageFolder
+  
+  puts "packageImage WONT WORK YET, FIX IT **************";exit;
+  
   # Stop and exit if no xsa
   if {![file exists $outputDir/$TOP_ENTITY.xsa]} {puts "ERROR: $TOP_ENTITY.xsa not found!";exit}
 
@@ -370,5 +368,29 @@ proc preSynthRMcheck {} {
     #set curRPinst [lindex $RPs [expr 2*$idx + 1]]
     #set curRMs    [lindex $RMs [expr 2*$idx + 1]]
     #puts "Running $curRPdir, RP module $curRPinst, with RMs: $curRMs"
+  }
+}
+
+#--------------------------------------------------------------------------------------------------
+# check if non-BD IP exists for this design
+#--------------------------------------------------------------------------------------------------
+proc getIPs {} {
+  upvar ipDir ipDir
+
+  if {![file exists $ipDir]} {return TRUE} ;# if no IP for project, done.
+  set files [glob -nocomplain -tails -directory $ipDir/tcl *.tcl]
+  if {$files == ""} {return TRUE} ;# no tcl files, done.
+
+  return FALSE
+}
+
+#--------------------------------------------------------------------------------------------------
+# delete all generated IP & project
+#--------------------------------------------------------------------------------------------------
+proc cleanIP {} {
+  upvar ipDir ipDir
+  set files [glob -nocomplain -tails -directory $ipDir *] 
+  foreach x $files {
+    if {$x == "tcl"} {continue} else {file delete -force $ipDir/$x}
   }
 }
