@@ -3,6 +3,7 @@
 .srcs
 *.log
 *.jou
+vivado*
 
 hd_visual
 

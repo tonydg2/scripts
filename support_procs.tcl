@@ -181,14 +181,14 @@ proc outputDirGen {} {
     file rename -force $outputDir $newOutputDir
   }
   file mkdir $outputDir
-  file mkdir $outputDir/bit
+  #file mkdir $outputDir/bit
   set buildFolder $timeStampVal\_$ghash_msb
   file mkdir $outputDir/$buildFolder
 
   # "write_bitstream -force" won't create non-existent folders like write_checkpoint does
   # remove this if xilinx version is ever fixed...?
-  set idx 0
-  foreach x $RPs {if {[expr {$idx % 2}] == 0 } {incr idx;file mkdir $outputDir/bit/$x ;continue} else {incr idx;continue}}
+  #set idx 0
+  #foreach x $RPs {if {[expr {$idx % 2}] == 0 } {incr idx;file mkdir $outputDir/bit/$x ;continue} else {incr idx;continue}}
 
   return "$outputDir/$buildFolder"
 }

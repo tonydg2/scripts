@@ -23,14 +23,12 @@ proc place_n_route {name} {
 #--------------------------------------------------------------------------------------------------
 
 set RMs       [lindex $argv 0]
-set rmDir     [lindex $argv 1]
-set dcpDir    [lindex $argv 2]
-set rpCell    [lindex $argv 3] ;# delete
-set RPs       [lindex $argv 4]
-set RPlen     [lindex $argv 5]
-set outputDir [lindex $argv 6]
-set buildTime [lindex $argv 7]
-set MaxRMs    [lindex $argv 8]
+set dcpDir    [lindex $argv 1]
+set RPs       [lindex $argv 2]
+set RPlen     [lindex $argv 3]
+set outputDir [lindex $argv 4]
+set buildTime [lindex $argv 5]
+set MaxRMs    [lindex $argv 6]
 
 set staticDFX true ;# temporary - run empty static build for DFX runs? arg for this option?
 
@@ -58,7 +56,7 @@ for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i
     if {!([lsearch $cellProperty "0"] == "-1")} {
       update_design   -cell $curRPinst -black_box ;# necessary for subsequent loops after fully populated with RMs in each RP, replacing with new RM must first declare blackbox on the RP
     }
-    read_checkpoint -cell $curRPinst $rmDir/$curRPdir/$curRPdir\_post_synth_$RM.dcp
+    read_checkpoint -cell $curRPinst $dcpDir/$curRPdir/$curRPdir\_post_synth_$RM.dcp
     append cfgName "-" $curRPdir\_$RM
   }
 
@@ -68,6 +66,7 @@ for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i
     source ./load_git_hash.tcl                                                             
     set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
     write_checkpoint -force $dcpDir/$cfgName.dcp
+    if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit} ;# write_bitstream won't create folder even with -force
     write_bitstream -force -no_partial_bitfile $outputDir/bit/$cfgName.bit
   }
   
@@ -80,6 +79,7 @@ for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i
       continue
     } else {
       set RM [file rootname [lindex [lindex $RMs $x] $config]]
+      if {![file exists $outputDir/bit/$curRPdir]} {file mkdir $outputDir/bit/$curRPdir}
       write_bitstream -force -cell $curRPinst $outputDir/bit/$curRPdir/$curRPdir\_$RM\_partial.bit
     }
   }
@@ -105,6 +105,7 @@ if {$DFXrun && $staticDFX} {
   set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
   source ./load_git_hash.tcl                                                             
   set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
+  if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit}
   write_bitstream   -force -no_partial_bitfile $outputDir/bit/static ;# static with empty RPs 
   write_checkpoint  -force $dcpDir/static_route.dcp ;# static with empty RPs 
   report_timing_summary -file $dcpDir/timing_summary_static_route.rpt
@@ -114,6 +115,7 @@ if {$DFXrun && $staticDFX} {
   set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
   source ./load_git_hash.tcl                                                             
   set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
+  if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit}
   write_bitstream   -force -no_partial_bitfile $outputDir/bit/static                            
   write_checkpoint  -force $dcpDir/static_route.dcp ;# complete checkpoint if non-DFX run 
   report_timing_summary -file $dcpDir/timing_summary_static_route.rpt

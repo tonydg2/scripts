@@ -1,4 +1,4 @@
-# -clean -name  -skipRM  -skipBD  -skipSYN  -skipIMP  -skipBIT -noCleanImg
+# -clean -name  -skipIP -skipRM  -skipBD  -skipSYN  -skipIMP  -skipBIT -noCleanImg
 #
 # TODO: 
 #       - maybe want to have synth RMs DCPs separate so as to be able to skip it
@@ -7,11 +7,6 @@
 # Top level build script
 # > tclsh RUN_BUILD.tcl
 
-# -clean                  ; removes generated files/folders in the scripts directory
-# -proj                   ; generate project only, if -name is not provided, default name is DEFAULT_PROJECT
-# -name <project_name>    ; name of project when -proj is used, projects with names beginning with PRJ will be ignored in git
-# -bd <bd tcl script name>; provide name of bd tcl script, if not used default is "top_bd". Debug only. BD internally must remain 'top_bd'.
-# -verbose, -no_bd        ; for debug
 
 set VivadoPath "/mnt/TDG_512/xilinx/Vivado/2023.2"
 set VivadoSettingsFile $VivadoPath/settings64.sh
@@ -26,6 +21,7 @@ source support_procs.tcl
 set TOP_ENTITY  "top_io" ;# top entity name or image/bit file generated name...
 set partNum     "xczu3eg-sbva484-1-i"
 set hdlDir      "../hdl"
+set ipDir       "../ip"
 set xdcDir      "../xdc"
 set outputDir   "../output_products"
 set dcpDir      "$outputDir/dcp"
@@ -35,15 +31,11 @@ set projName    [getProjName]
 #--------------------------------------------------------------------------------------------------
 # DFX vars for now, need better way to do this...
 #--------------------------------------------------------------------------------------------------
-set rpCell      "led_cnt_pr_inst" ;# reconfigurable partition instance name in static region
-set rmDir       $dcpDir;#"$outputDir/RM_synth" ;# ../output_products_RM;# output directory for reconfigurable modules DCPs
-set topRP       "led_cnt_pr"  ;# module name
-#set RMs         [getRMs] 
 set RMs ""
 set RPs ""
 set RPlen ""
 set MaxRMs ""
-getDFXconfigs ;# support_procs.tcl
+getDFXconfigs 
 
 #--------------------------------------------------------------------------------------------------
 # Pre-build stuff
@@ -54,61 +46,43 @@ set startTime [clock seconds]
 set buildTimeStamp [getTimeStamp $startTime]
 puts "\n*** BUILD TIMESTAMP: $buildTimeStamp ***\n"
 puts "TCL Version : $tcl_version"
-helpMsg ;# support_procs.tcl
+helpMsg 
+set ghash_msb [getGitHash] 
 
-set ghash_msb     [getGitHash]    ;# support_procs.tcl
-if {"-noCleanImg" in $argv} {
-  set cleanImageFolder false} else {set cleanImageFolder true}
-
-if {$cleanImageFolder} {
-  set imageFolder [outputDirGen] ;# support_procs.tcl
-}
-
-set genProj FALSE
-if {"-proj" in $argv} {
-  set genProj TRUE
-  puts "\n\n*** PROJECT GENERATION ONLY ***\n\n"
-}
-
-if {"-clean" in $argv} {cleanProc} ;# support_procs.tcl
+if {"-noCleanImg" in $argv} {set cleanImageFolder false} else {set cleanImageFolder true}
+if {$cleanImageFolder} {set imageFolder [outputDirGen]} 
+if {"-clean" in $argv} {cleanProc} 
 #--------------------------------------------------------------------------------------------------
 # vivado synth/impl commands
 #--------------------------------------------------------------------------------------------------
-#set RM_syn_args "$hdlDir $partNum \"$RMs\" $rmDir"
-#vivadoCmd2 "RM_syn.tcl" $argv $RM_syn_args;#support_procs.tcl
+if {!("-skipIP" in $argv)} {
+  vivadoCmd "gen_ip.tcl" "-proj" "-gen"
+}
+
 if {!("-skipRM" in $argv) & !($RMs == "")} {
-  preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. But also sets RPlen. If this doesn't fail, safe to synth RMs.
-  vivadoCmd "syn_rm.tcl" $hdlDir $partNum \"$RMs\" $rmDir \"$RPs\" $RPlen;#$topRP;#support_procs.tcl THIS WORKS AS DESIRED
+  preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. If this doesn't fail, safe to synth RMs.
+  vivadoCmd "syn_rm.tcl" $hdlDir $partNum \"$RMs\" $dcpDir \"$RPs\" $RPlen
 }
 
 if {!("-skipBD" in $argv)} {
   vivadoCmd "bd_gen.tcl" $hdlDir $partNum $bdDir $projName $topBD
 }
-if {!($RPs == "")} {puts "\n\n**** RPs NOT EMPTY!!!!!!!!\n\n"}
 if {!("-skipSYN" in $argv)} {
   vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName \"$RPs\"
 }
 
-# loop here for multiple RPs...? or in the script?
 if {!("-skipIMP" in $argv)} {
-  vivadoCmd "imp.tcl" \"$RMs\" $rmDir $dcpDir $rpCell \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs
+  vivadoCmd "imp.tcl" \"$RMs\" $dcpDir \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs
 }
 
-#if {!("-skipBIT" in $argv)} {
-#  vivadoCmd "bit5.tcl" $TOP_ENTITY $outputDir $rpCell \"$RMs\" $buildTimeStamp $dcpDir
-#}
-#puts "\nDONE DONE\n";exit
 #--------------------------------------------------------------------------------------------------
 # End of build stuff
 #--------------------------------------------------------------------------------------------------
 
 # check output_products folder at end
-# packageImage ;# support_procs.tcl
+# packageImage
 
-
-buildTimeEnd  ;# support_procs.tcl
+buildTimeEnd
 endCleanProc
 cleanProc
-
-#if {!$genProj} {endCleanProc} ;# support_procs.tcl
 

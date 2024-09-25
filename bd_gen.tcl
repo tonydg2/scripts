@@ -16,7 +16,7 @@ set bdDir     [lindex $argv 2]
 set projName  [lindex $argv 3]
 set topBD     [lindex $argv 4]
 
-set_part $partNum
+set_part $partNum ;# might not need this
 create_project $projName -part $partNum -in_memory
 set_property TARGET_LANGUAGE Verilog [current_project]
 #set_property BOARD_PART <board_part_name> [current_project]

@@ -5,11 +5,9 @@ proc readVerilog {dir} {
   set     files     [glob -nocomplain -tails -directory $dir *.v]
   append  files " " [glob -nocomplain -tails -directory $dir *.sv]
   foreach x $files {
-    puts "\n *** $dir/$x *** \n"
     read_verilog  $dir/$x
   }
 }
-
 
 set hdlDir    [lindex $argv 0]
 set partNum   [lindex $argv 1]
@@ -20,7 +18,39 @@ set xdcDir    [lindex $argv 5]
 set projName  [lindex $argv 6]
 set RPs       [lindex $argv 7]
 
+set_part $partNum
+#--------------------------------------------------------------------------------------------------
 
+# fix this, better way?
+  #set ip1 "/mnt/TDG_512/projects/1_u96_dfx/ip/managed_ip_project/managed_ip_project.srcs/sources_1/ip/dfx_axi_mgr/dfx_axi_mgr"
+  #read_ip $ip1.xci
+  #set_property generate_synth_checkpoint false [get_files $ip1.xci]
+  #generate_target all [get_files $ip1.xci] 
+  #generate_target instantiation_template [get_ips]
+
+
+# IP must be in ../ip/<ipName>/<ipName>.xci
+set ipDir "../ip"
+set xciFiles [glob -nocomplain  $ipDir/**/*.xci]
+foreach x $xciFiles {
+  set xciRootName [file rootname [file tail $x]]
+  read_ip $ipDir/$xciRootName/$xciRootName.xci
+  set_property generate_synth_checkpoint false [get_files $ipDir/$xciRootName/$xciRootName.xci]
+  generate_target all [get_files $ipDir/$xciRootName/$xciRootName.xci] 
+}
+
+#  #--Works Start
+#  set ipDir "../ip"
+#  set ip "dfx_axi_mgr ila0 ila1 ila_axi0"
+#  foreach x $ip {
+#    read_ip $ipDir/$x/$x.xci 
+#    set_property generate_synth_checkpoint false [get_files $ipDir/$x/$x.xci]
+#    generate_target all [get_files $ipDir/$x/$x.xci] 
+#  }
+#  #--Works End
+
+
+#--------------------------------------------------------------------------------------------------
 #set projName "DEFAULT_PROJECT"
 
 # top file synthesized first. there are black box modules (module definitions in addition to instances)
