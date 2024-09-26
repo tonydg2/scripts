@@ -48,7 +48,7 @@ puts "\n*** BUILD TIMESTAMP: $buildTimeStamp ***\n"
 puts "TCL Version : $tcl_version"
 helpMsg 
 set ghash_msb [getGitHash]
-set noIP [getIPs]
+set noIP [getIPs] ;# returns TRUE if there are no IPs
 
 if {("-noCleanImg" in $argv) || ("-skipSYN" in $argv) || ("-skipIMP" in $argv) || ("-skipRM" in $argv)} {
   puts "\n** Skipping clean output_products. **"
@@ -67,7 +67,7 @@ if {!("-skipIP" in $argv) && !($noIP)} {
 }
 
 # Synthesize RMs OOC
-if {!("-skipRM" in $argv) & !($RMs == "")} {
+if {!("-skipRM" in $argv) && !($RMs == "")} {
   preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. If this doesn't fail, safe to synth RMs.
   vivadoCmd "syn_rm.tcl" $hdlDir $partNum \"$RMs\" $dcpDir \"$RPs\" $RPlen
 }

@@ -38,33 +38,6 @@ proc getProjName {} {
   }
   return $projName
 }
-#--------------------------------------------------------------------------------------------------
-# TODO; add arg for primary RM to be built with first config?
-#--------------------------------------------------------------------------------------------------
-proc getRMs {} {
-  upvar hdlDir hdlDir
-  
-  set     filesVerilog      [glob -nocomplain -tails -directory $hdlDir/RM0 *.v]
-  append  filesVerilog " "  [glob -nocomplain -tails -directory $hdlDir/RM0 *.sv]
-
-  set files {} 
-  foreach x $filesVerilog {
-    lappend files [file rootname $x]
-  }
-  return [lsort $files] ;# default ascii sort
-}
-#--------------------------------------------------------------------------------------------------
-# 
-#--------------------------------------------------------------------------------------------------
-proc checkPartialBuild {} {
-  upvar argv argv
-  if {("-skipRM"  in $argv) |
-      ("-skipBD"  in $argv) |
-      ("-skipSYN" in $argv) |
-      ("-skipIMP" in $argv) |
-      ("-skipBIT" in $argv)
-  } {return true} else {return false}
-}
 
 #--------------------------------------------------------------------------------------------------
 # 
@@ -120,11 +93,12 @@ proc getGitHash {} {
 }
 
 #--------------------------------------------------------------------------------------------------
-# 
+# needs update or just remove, meh
 #--------------------------------------------------------------------------------------------------
 proc helpMsg {} {
     upvar argv argv
   if {("-h" in $argv) ||("-help" in $argv)} {
+    puts "OUT DATED OUT DATED OUT DATED INACCURATE"
     puts "\t-proj : Generate project only."
     puts "\t-name <PROJECT_NAME> : Name of project (used with -proj). Default name used if not specified."
     puts "\t-clean : Clean build generated files and logs from scripts directory."
@@ -205,19 +179,10 @@ proc packageImage {} {
     file rename -force $outputDir/$x $outputDirImage/$buildFolder/$TOP_ENTITY.bit
   }
 
-
   ###catch {file rename -force $outputDir/$TOP_ENTITY.ltx $outputDirImage/$buildFolder/$TOP_ENTITY.ltx}
   ###catch {file rename -force $outputDir/$TOP_ENTITY.bit $outputDirImage/$buildFolder/$TOP_ENTITY.bit}
   ###catch {file rename -force $outputDir/$TOP_ENTITY.xsa $outputDirImage/$buildFolder/$TOP_ENTITY.xsa}
 
-}
-
-#--------------------------------------------------------------------------------------------------
-# used for custom get time proc
-# Function to convert decimal numbers to hexadecimal strings with fixed digit length
-#--------------------------------------------------------------------------------------------------
-proc dec2hex {digits num} {
-  return [format "%0${digits}X" $num]
 }
 
 #--------------------------------------------------------------------------------------------------
@@ -332,7 +297,7 @@ proc getDFXconfigs {} {
     set filesVerilog [lsort $filesVerilog]
     set rmModName ""
     foreach vFile $filesVerilog {
-      append rmModName " " [findModuleName $hdlDir/$x/$vFile]
+      append rmModName " " [findModuleName $hdlDir/$x/$vFile] ;# parse file for module name
     }
     verifyModuleNames $rmModName ;# verify all match otherwise error/quit
     if {[expr {[llength $filesVerilog] > $MaxRMs}]} {set MaxRMs [llength $filesVerilog]} ;# need number of RMs in RP that has the most RMs

@@ -1,3 +1,6 @@
+# TODO: option for BD to be in-memory build, see TODO in bd_gen.tcl
+#  this script is sourcing BD files from saved project, need to source from in-memory
+
 # synth script for non-DFX project, or for static portion of DFX project
 
 proc readVerilog {dir} {
@@ -51,7 +54,7 @@ readVerilog $hdlDir
 readVerilog $hdlDir/bd 
 readVerilog $hdlDir/common 
 
-set     filesXDC                [glob -nocomplain -tails -directory $xdcDir *.xdc]
+set filesXDC [glob -nocomplain -tails -directory $xdcDir *.xdc]
 foreach x $filesXDC {
   read_xdc  $xdcDir/$x
 }

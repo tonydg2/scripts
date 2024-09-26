@@ -1,5 +1,5 @@
 # implementation & bitstream(s)
-
+# includes DFX - multiple RPs
 #--------------------------------------------------------------------------------------------------
 # proc for P&R commands
 #--------------------------------------------------------------------------------------------------
@@ -31,20 +31,16 @@ set staticDFX false ;# temporary - run empty static build for DFX runs? arg for 
 if {$RMs==""} {set DFXrun false} else {set DFXrun true}
 #--------------------------------------------------------------------------------------------------
 
-
 open_checkpoint $dcpDir/static_synth.dcp
 
-for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i.e. no RMs
+for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i.e. no RMs/RPs i.e. no DFX
   set cfgName "CONFIG"
   for {set x 1} {$x < [llength $RPs]} {incr x 2} {
     set curRPinst "[lindex $RPs $x]_inst"
     set curRPdir [lindex $RPs [expr $x-1]]  
-    if {[lindex [lindex $RMs $x] $config] == ""} {
-      # next is empty, so leave as previous and skip read_checkpoint
-      continue
-    } else {
-      set RM [file rootname [lindex [lindex $RMs $x] $config]]
-    }
+    if {[lindex [lindex $RMs $x] $config] == ""} {continue} ;# next is empty (no more RMs for this RP), so leave as previous and skip read_checkpoint
+    else {set RM [file rootname [lindex [lindex $RMs $x] $config]]}
+    
     #puts "assembling config RP:$curRPinst in $curRPdir with $RM"
     # check if RP is blackbox. If not, set as blackbox
     set cellProperty [report_property [get_cells $curRPinst] IS_BLACKBOX -return_string]
@@ -52,11 +48,12 @@ for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i
     if {!([lsearch $cellProperty "0"] == "-1")} {
       update_design   -cell $curRPinst -black_box ;# necessary for subsequent loops after fully populated with RMs in each RP, replacing with new RM must first declare blackbox on the RP
     }
-    read_checkpoint -cell $curRPinst $dcpDir/$curRPdir/$curRPdir\_post_synth_$RM.dcp
+    read_checkpoint -cell $curRPinst $dcpDir/$curRPdir/$curRPdir\_post_synth_$RM.dcp ;# populate RP with next RM synth dcp
     append cfgName "-" $curRPdir\_$RM
   }
-
+  # now have a config all RPs populated with RMs. time to P&R
   place_n_route $cfgName
+  # this is where updates necessary if other configurations are desired. currently only one (first) config is built
   if {$config == 0} { ;# this is a full config run so need timestamp and githash
     set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
     source ./tcl/load_git_hash.tcl                                                             

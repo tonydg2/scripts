@@ -1,4 +1,8 @@
 # TODO: full in-memory project option?
+#   inherently, this is running in non-project mode, then being saved at the end to disk.
+#   however, the syn.tcl script is looking at the saved project, not the in-memory files.
+#   need to arrange this and syn.tcl to run full in-memory...
+#   if -name is provided: use saved proj, otherwise in-memory only
 
 # generate block design with associated dependencies
 # UG994, UG892
