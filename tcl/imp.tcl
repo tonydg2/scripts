@@ -1,3 +1,5 @@
+# TODO: for DFX add pr_verify
+
 # implementation & bitstream(s)
 # includes DFX - multiple RPs
 #--------------------------------------------------------------------------------------------------
@@ -38,8 +40,13 @@ for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i
   for {set x 1} {$x < [llength $RPs]} {incr x 2} {
     set curRPinst "[lindex $RPs $x]_inst"
     set curRPdir [lindex $RPs [expr $x-1]]  
-    if {[lindex [lindex $RMs $x] $config] == ""} {continue} ;# next is empty (no more RMs for this RP), so leave as previous and skip read_checkpoint
-    else {set RM [file rootname [lindex [lindex $RMs $x] $config]]}
+    
+    # next is empty (no more RMs for this RP), so leave as previous and skip read_checkpoint
+    if {[lindex [lindex $RMs $x] $config] == ""} {
+      continue
+    } else {
+      set RM [file rootname [lindex [lindex $RMs $x] $config]]
+    }
     
     #puts "assembling config RP:$curRPinst in $curRPdir with $RM"
     # check if RP is blackbox. If not, set as blackbox
