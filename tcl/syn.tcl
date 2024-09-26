@@ -62,11 +62,14 @@ foreach x $filesXDC {
 #--------------------------------------------------------------------------------------------------
 # read BD 
 #--------------------------------------------------------------------------------------------------
-
-#set bdFile        ".srcs/sources_1/bd/$topBD/$topBD.bd"
-#set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
-set bdFile        "../$projName/$projName.srcs/sources_1/bd/$topBD/$topBD.bd"
-set wrapperFile   "../$projName/$projName.gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+# in-memory or saved BD project
+if {$projName == "DEFAULT_PROJECT"} {
+  set bdFile        ".srcs/sources_1/bd/$topBD/$topBD.bd"
+  set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+} else {
+  set bdFile        "../$projName/$projName.srcs/sources_1/bd/$topBD/$topBD.bd"
+  set wrapperFile   "../$projName/$projName.gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+}
 
 read_bd $bdFile
 read_verilog $wrapperFile

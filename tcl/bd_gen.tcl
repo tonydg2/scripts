@@ -21,7 +21,7 @@ set bdDir     [lindex $argv 2]
 set projName  [lindex $argv 3]
 set topBD     [lindex $argv 4]
 
-set_part $partNum ;# might not need this
+#set_part $partNum ;# might not need this
 create_project $projName -part $partNum -in_memory
 set_property TARGET_LANGUAGE Verilog [current_project]
 #set_property BOARD_PART <board_part_name> [current_project]
@@ -45,10 +45,8 @@ make_wrapper -files [get_files $bdFile] -top
 read_verilog $wrapperFile
 set_property synth_checkpoint_mode None [get_files $bdFile]
 generate_target all [get_files $bdFile]
+set_property top [file rootname [file tail $wrapperFile]] [current_fileset]  
 
-#if {$genProj} {
-  set_property top [file rootname [file tail $wrapperFile]] [current_fileset]  
-  save_project_as $projName ../$projName -force
-#  
-#}
+# if no -name arg is provided, BD proj not saved
+if {!($projName == "DEFAULT_PROJECT")} {save_project_as $projName ../$projName -force}
 

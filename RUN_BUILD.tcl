@@ -98,3 +98,4 @@ buildTimeEnd
 endCleanProc
 cleanProc
 
+#close_project -delete
