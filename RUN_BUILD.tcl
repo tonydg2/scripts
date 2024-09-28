@@ -2,7 +2,7 @@
 #
 # -skipIP -skipBD  
 # -skipRM -skipSYN  -skipIMP 
-# -clean  -noCleanImg -cleanIP
+# -clean  -noCleanImg -cleanIP -forceCleanImg
 #
 # Top level build script
 # > tclsh RUN_BUILD.tcl
@@ -50,9 +50,13 @@ helpMsg
 set ghash_msb [getGitHash]
 set noIP [getIPs] ;# returns TRUE if there are no IPs
 
-if {("-noCleanImg" in $argv) || ("-skipSYN" in $argv) || ("-skipIMP" in $argv) || ("-skipRM" in $argv)} {
+if {("-forceCleanImg" in $argv)} {
+  set imageFolder [outputDirGen]
+} elseif {("-noCleanImg" in $argv) || ("-skipSYN" in $argv) || ("-skipIMP" in $argv) || ("-skipRM" in $argv)} {
   puts "\n** Skipping clean output_products. **"
-} else {set imageFolder [outputDirGen]}
+} else {
+  set imageFolder [outputDirGen]
+}
 
 if {"-clean" in $argv} {cleanProc} 
 if {"-cleanIP" in $argv} {cleanIP}
