@@ -15,7 +15,10 @@ proc vivadoCmd {fileName args} {
   ## sh points to dash instead of bash by default in Ubuntu
   #if {[catch {exec sh -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} 
   if {[catch {exec /bin/bash -c "source $VivadoSettingsFile; $buildCmd" >@stdout} cmdErr]} {
-    puts "COMMAND ERROR:\n$cmdErr";exit;
+    puts "COMMAND ERROR:\n$cmdErr"
+    puts "FAILED in $fileName"
+    puts "args : \n$args"
+    exit;
   }
 }
 #--------------------------------------------------------------------------------------------------

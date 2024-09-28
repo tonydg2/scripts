@@ -48,12 +48,12 @@ puts "\n*** BUILD TIMESTAMP: $buildTimeStamp ***\n"
 puts "TCL Version : $tcl_version"
 helpMsg 
 set ghash_msb [getGitHash]
-set noIP [getIPs] ;# returns TRUE if there are no IPs
 
 if {("-noCleanImg" in $argv) || ("-skipSYN" in $argv) || ("-skipIMP" in $argv) || ("-skipRM" in $argv)} {
   puts "\n** Skipping clean output_products. **"
 } else {set imageFolder [outputDirGen]}
 
+if {"-noIP" in $argv} { set noIP TRUE } else {set noIP [getIPs]} ;# returns TRUE if there are no IPs
 if {"-clean" in $argv} {cleanProc} 
 if {"-cleanIP" in $argv} {cleanIP}
 

@@ -38,8 +38,11 @@ for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i
   for {set x 1} {$x < [llength $RPs]} {incr x 2} {
     set curRPinst "[lindex $RPs $x]_inst"
     set curRPdir [lindex $RPs [expr $x-1]]  
-    if {[lindex [lindex $RMs $x] $config] == ""} {continue} ;# next is empty (no more RMs for this RP), so leave as previous and skip read_checkpoint
-    else {set RM [file rootname [lindex [lindex $RMs $x] $config]]}
+    if {[lindex [lindex $RMs $x] $config] == ""} {
+      continue  ;# next is empty (no more RMs for this RP), so leave as previous and skip read_checkpoint
+    } else {
+      set RM [file rootname [lindex [lindex $RMs $x] $config]]
+    }
     
     #puts "assembling config RP:$curRPinst in $curRPdir with $RM"
     # check if RP is blackbox. If not, set as blackbox
@@ -85,7 +88,7 @@ for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i
 
 # for DFX run, implemented config is already live, so just blackbox every RP and generate bit
 # for non-DFX, synth checkpoint is open from above, p&r will be run
-if {$DFXrun && $staticDFX} {
+if {$DFXrun && $staticDFX} { ;# skip this if empty static not desired for DFX projects
   puts "DFX IMPLEMENTATION STATIC"
   set idx 0
   foreach RP $RPs {
@@ -102,16 +105,16 @@ if {$DFXrun && $staticDFX} {
   write_bitstream   -force -no_partial_bitfile $outputDir/bit/static ;# static with empty RPs 
   write_checkpoint  -force $dcpDir/static_route.dcp ;# static with empty RPs 
   report_timing_summary -file $dcpDir/timing_summary_static_route.rpt
-} else { ;# non-DFX                                                                       
+} elseif {!$DFXrun} { ;# non-DFX                                                                       
   puts "NON-DFX IMPLEMENTATION"
-  place_n_route "static"                                                                  
+  place_n_route "top"                                                                  
   set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
   source ./tcl/load_git_hash.tcl                                                             
   set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
   if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit}
-  write_bitstream   -force -no_partial_bitfile $outputDir/bit/static                            
-  write_checkpoint  -force $dcpDir/static_route.dcp ;# complete checkpoint if non-DFX run 
-  report_timing_summary -file $dcpDir/timing_summary_static_route.rpt
+  write_bitstream   -force -no_partial_bitfile $outputDir/bit/top                            
+  write_checkpoint  -force $dcpDir/top_route.dcp ;# complete checkpoint if non-DFX run 
+  report_timing_summary -file $dcpDir/timing_summary_top_route.rpt
 }
 
 # this may need updates - what if ILAs inside RPs...?
