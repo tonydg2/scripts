@@ -1,3 +1,4 @@
+# these commands run from the output_products/dcp  directory in vivado tcl mode 
 #----------------------------------------------------------------------------------------------
 # get full static with cnt_top set as blackbox and reconfigurable
   # temp modified syn.tcl
