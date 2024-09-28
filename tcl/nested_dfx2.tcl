@@ -90,6 +90,8 @@ write_checkpoint cnt_TOP_A_cntC_cnt2C_routed.dcp;
 open_checkpoint cnt_TOP_A_cntA_cnt2A_routed.dcp;
 file mkdir BIT_AAA;
 write_bitstream BIT_AAA/configAAA;
+write_hw_platform -fixed -force AAA_platform.xsa;
+
 # SUCCESS
 #----------------------------------------------------------------------------------------------
 # full bit, and two lower level partials cnt_C and cnt2_C
