@@ -36,3 +36,6 @@
 -skipIMP    : skip implementation and bitstream gen, generally for debug, or just desire other steps
               output products.
 
+-noIP       : run as if there are no IP in the IP/tcl folder (even if there are) 
+
+-noRM       : run as if there are no RMs in the RM* folders (even if there are)

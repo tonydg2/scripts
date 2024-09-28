@@ -3,7 +3,7 @@
 # -skipIP -skipBD  
 # -skipRM -skipSYN  -skipIMP 
 # -clean  -noCleanImg -cleanIP
-#
+# -noRM, -noIP
 # Top level build script
 # > tclsh RUN_BUILD.tcl
 
@@ -35,7 +35,8 @@ set RMs ""    ;# List of all reconfigurable modules, organized per RP
 set RPs ""    ;# List of all reconfigurable partitions.
 set RPlen ""  ;# Number of RPs in design
 set MaxRMs "" ;# Number of RMs in the RP that has the largest number of RMs.
-getDFXconfigs ;# Proc to populate DFX vars/lists above.
+
+if {!("-noRM" in $argv)} {getDFXconfigs} ;# Proc to populate DFX vars/lists above.
 
 #--------------------------------------------------------------------------------------------------
 # Pre-build stuff
