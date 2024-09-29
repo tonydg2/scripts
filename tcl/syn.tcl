@@ -80,5 +80,5 @@ read_verilog $wrapperFile
 
 synth_design -top $topEntity -part $partNum
 if {!($RPs=="")} {foreach {ignore RP} $RPs {set_property HD.RECONFIGURABLE true [get_cells $RP\_inst]}}
-write_checkpoint -force $dcpDir/static_synth.dcp
+write_checkpoint -force $dcpDir/top_synth.dcp
 

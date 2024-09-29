@@ -31,7 +31,8 @@ set staticDFX false ;# temporary - run empty static build for DFX runs? arg for 
 if {$RMs==""} {set DFXrun false} else {set DFXrun true}
 #--------------------------------------------------------------------------------------------------
 
-open_checkpoint $dcpDir/static_synth.dcp
+#open_checkpoint $dcpDir/static_synth.dcp
+open_checkpoint $dcpDir/top_synth.dcp
 
 for {set config 0} {$config < $MaxRMs} {incr config} { ;# skipped if no MaxRMs i.e. no RMs/RPs i.e. no DFX
   set cfgName "CONFIG"

@@ -4,6 +4,8 @@
 # -skipRM -skipSYN  -skipIMP 
 # -clean  -noCleanImg -cleanIP
 # -noRM, -noIP
+# -proj
+#
 # Top level build script
 # > tclsh RUN_BUILD.tcl
 
@@ -50,9 +52,17 @@ puts "TCL Version : $tcl_version"
 helpMsg 
 set ghash_msb [getGitHash]
 
-if {("-noCleanImg" in $argv) || ("-skipSYN" in $argv) || ("-skipIMP" in $argv) || ("-skipRM" in $argv)} {
-  puts "\n** Skipping clean output_products. **"
-} else {set imageFolder [outputDirGen]}
+if {("-proj" in $argv)} {set bdProjOnly TRUE} else {set bdProjOnly FALSE}
+
+if {!$bdProjOnly} { ;# BD project gen only, skip all this
+  if {("-forceCleanImg" in $argv)} {
+    set imageFolder [outputDirGen]
+  } elseif {("-noCleanImg" in $argv) || ("-skipSYN" in $argv) || ("-skipIMP" in $argv) || ("-skipRM" in $argv)} {
+    puts "\n** Skipping clean output_products. **"
+  } else {
+    set imageFolder [outputDirGen]
+  }
+} else {puts "\n*** Generating BD project only ***"}
 
 if {"-noIP" in $argv} { set noIP TRUE } else {set noIP [getIPs]} ;# returns TRUE if there are no IPs
 if {"-clean" in $argv} {cleanProc} 
@@ -61,30 +71,29 @@ if {"-cleanIP" in $argv} {cleanIP}
 #--------------------------------------------------------------------------------------------------
 # vivado synth/impl commands
 #--------------------------------------------------------------------------------------------------
-
-# Generate non-BD IP
-if {!("-skipIP" in $argv) && !($noIP)} {
-  vivadoCmd "gen_ip.tcl" $ipDir $partNum "-proj" "-gen"
-}
-
-# Synthesize RMs OOC
-if {!("-skipRM" in $argv) && !($RMs == "")} {
-  preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. If this doesn't fail, safe to synth RMs.
-  vivadoCmd "syn_rm.tcl" $hdlDir $partNum \"$RMs\" $dcpDir \"$RPs\" $RPlen
-}
-
 # Generate BD
 if {!("-skipBD" in $argv)} {
   vivadoCmd "bd_gen.tcl" $hdlDir $partNum $bdDir $projName $topBD
 }
 
+# Generate non-BD IP
+if {!("-skipIP" in $argv) && !$noIP && !$bdProjOnly} {
+  vivadoCmd "gen_ip.tcl" $ipDir $partNum "-proj" "-gen"
+}
+
+# Synthesize RMs OOC
+if {!("-skipRM" in $argv) && !($RMs == "") && !$bdProjOnly} {
+  preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. If this doesn't fail, safe to synth RMs.
+  vivadoCmd "syn_rm.tcl" $hdlDir $partNum \"$RMs\" $dcpDir \"$RPs\" $RPlen
+}
+
 # Synthesize full design (static if DFX)
-if {!("-skipSYN" in $argv)} {
+if {!("-skipSYN" in $argv) && !$bdProjOnly} {
   vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName \"$RPs\" $noIP
 }
 
 # P&R + bitsream(s)
-if {!("-skipIMP" in $argv)} {
+if {!("-skipIMP" in $argv) && !$bdProjOnly} {
   vivadoCmd "imp.tcl" \"$RMs\" $dcpDir \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs
 }
 
@@ -100,3 +109,6 @@ endCleanProc
 cleanProc
 
 #close_project -delete
+
+#set_param general.maxThreads <value>
+
