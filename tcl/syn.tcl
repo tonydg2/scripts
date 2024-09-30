@@ -1,5 +1,5 @@
-# TODO: option for BD to be in-memory build, see TODO in bd_gen.tcl
-#  this script is sourcing BD files from saved project, need to source from in-memory
+# TODO: - option for NO-BD (fabric only) 
+#       - option for multiple separate BDs...
 
 # synth script for non-DFX project, or for static portion of DFX project
 
