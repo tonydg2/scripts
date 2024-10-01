@@ -23,6 +23,7 @@ source tcl/support_procs.tcl
 set TOP_ENTITY  "top_io" ;# top entity name or image/bit file generated name...
 set partNum     "xczu3eg-sbva484-1-i"
 set hdlDir      "../hdl"
+set simDir      "../sim"
 set ipDir       "../ip"
 set xdcDir      "../xdc"
 set outputDir   "../output_products"
@@ -53,8 +54,9 @@ helpMsg
 set ghash_msb [getGitHash]
 
 if {("-proj" in $argv)} {set bdProjOnly TRUE} else {set bdProjOnly FALSE}
+if {("-sim" in $argv)} {set simProj TRUE} else {set simProj FALSE}
 
-if {!$bdProjOnly} { ;# BD project gen only, skip all this
+if {!$bdProjOnly && !$simProj} { ;# BD project or sim only, skip all this
   if {("-forceCleanImg" in $argv)} {
     set imageFolder [outputDirGen]
   } elseif {("-noCleanImg" in $argv) || ("-skipSYN" in $argv) || ("-skipIMP" in $argv) || ("-skipRM" in $argv)} {
@@ -62,7 +64,7 @@ if {!$bdProjOnly} { ;# BD project gen only, skip all this
   } else {
     set imageFolder [outputDirGen]
   }
-} else {puts "\n*** Generating BD project only ***"}
+} else {puts "\n*** Generating project only ***"}
 
 if {"-noIP" in $argv} { set noIP TRUE } else {set noIP [getIPs]} ;# returns TRUE if there are no IPs
 if {"-clean" in $argv} {cleanProc} 
@@ -72,29 +74,34 @@ if {"-cleanIP" in $argv} {cleanIP}
 # vivado synth/impl commands
 #--------------------------------------------------------------------------------------------------
 # Generate BD
-if {!("-skipBD" in $argv)} {
+if {!("-skipBD" in $argv) && !$simProj} {
   vivadoCmd "bd_gen.tcl" $hdlDir $partNum $bdDir $projName $topBD
 }
 
 # Generate non-BD IP
-if {!("-skipIP" in $argv) && !$noIP && !$bdProjOnly} {
+if {!("-skipIP" in $argv) && !$noIP && !$bdProjOnly && !$simProj} {
   vivadoCmd "gen_ip.tcl" $ipDir $partNum "-proj" "-gen"
 }
 
 # Synthesize RMs OOC
-if {!("-skipRM" in $argv) && !($RMs == "") && !$bdProjOnly} {
+if {!("-skipRM" in $argv) && !($RMs == "") && !$bdProjOnly && !$simProj} {
   preSynthRMcheck ;# mostly just pre verification of RPs/RMs from getDFXconfigs. If this doesn't fail, safe to synth RMs.
   vivadoCmd "syn_rm.tcl" $hdlDir $partNum \"$RMs\" $dcpDir \"$RPs\" $RPlen
 }
 
 # Synthesize full design (static if DFX)
-if {!("-skipSYN" in $argv) && !$bdProjOnly} {
+if {!("-skipSYN" in $argv) && !$bdProjOnly && !$simProj} {
   vivadoCmd "syn.tcl" $hdlDir $partNum $topBD $TOP_ENTITY $dcpDir $xdcDir $projName \"$RPs\" $noIP
 }
 
 # P&R + bitsream(s)
-if {!("-skipIMP" in $argv) && !$bdProjOnly} {
+if {!("-skipIMP" in $argv) && !$bdProjOnly && !$simProj} {
   vivadoCmd "imp.tcl" \"$RMs\" $dcpDir \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs
+}
+
+# simulation project
+if {$simProj} {
+  vivadoCmd "sim.tcl" $hdlDir $partNum $simDir $projName
 }
 
 #--------------------------------------------------------------------------------------------------
