@@ -32,7 +32,7 @@ set_property TARGET_LANGUAGE Verilog [current_project]
 set_property DEFAULT_LIB work [current_project]
 set_property SOURCE_MGMT_MODE All [current_project]
 
-#readVerilog $hdlDir/common 
+readVerilog $hdlDir/common 
 readVerilog $hdlDir
 readVerilog $simDir TRUE
 

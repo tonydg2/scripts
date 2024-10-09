@@ -1,3 +1,5 @@
+### No spaces allowed in any filenames or folders. Scripts will fail.
+
 # DFX
 - This version is automated. Verified on U96 with three RPs and three RMs each.
 - RMs must be in folders named RM* in hdl directory.

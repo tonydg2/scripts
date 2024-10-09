@@ -23,7 +23,7 @@ source tcl/support_procs.tcl
 set TOP_ENTITY  "top_io" ;# top entity name or image/bit file generated name...
 set partNum     "xczu3eg-sbva484-1-i"
 set hdlDir      "../hdl"
-set simDir      "../sim"
+set simDir      "../hdl/tb"
 set ipDir       "../ip"
 set xdcDir      "../xdc"
 set outputDir   "../output_products"
@@ -100,7 +100,7 @@ if {!("-skipIMP" in $argv) && !$bdProjOnly && !$simProj} {
 }
 
 # simulation project
-if {$simProj} {
+if {$simProj} { ;# arg = "-sim"
   vivadoCmd "sim.tcl" $hdlDir $partNum $simDir $projName
 }
 
