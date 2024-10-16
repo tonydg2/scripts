@@ -45,3 +45,7 @@
 -proj       : generate BD project only. must be run with -name option.
 
 -name       : name of BD project, "-name \<project-name>". 
+
+### Examples / Quick copies
+#### Build with BD project PRJO already generated, there are IP tcl files in IP folder not in use for this design (-noIP).
+cl;tclsh RUN_BUILD.tcl -clean -name PRJ0 -skipBD -noIP

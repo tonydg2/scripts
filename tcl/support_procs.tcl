@@ -56,9 +56,9 @@ proc buildTimeEnd {} {
   set buildSecRem [expr $buildTime % 60]
   
   puts "\n------------------------------------------"
-  puts "** BUILD COMPLETE **"
-  puts "Git Hash: $ghash_msb"
+  puts "** BUILD COMPLETE ** $buildTimeStamp\_$ghash_msb"
   puts "Timestamp: $buildTimeStamp"
+  puts "Git Hash: $ghash_msb"
   puts "\nBuild Time: $buildMin min:$buildSecRem sec"
   puts "------------------------------------------"
 
