@@ -12,8 +12,8 @@
   - All partial bitstreams are generated.
 - No VHDL. Verilog and systemverilog only.
 
-## script to build : RUN_BUILD.tcl
-> tclsh RUN_BUILD.tcl
+## script to build : BUILD.tcl
+> tclsh BUILD.tcl
 
 ### Arguments
 -clean      : cleans old generated files in scripts folder from previous builds.
@@ -48,6 +48,6 @@
 
 ## Examples / Quick copies
 #### Build with BD project PRJ0 already generated, there are IP tcl files in IP folder not in use for this design (-noIP).
-> cl;tclsh RUN_BUILD.tcl -clean -name PRJ0 -skipBD -noIP
+> tclsh BUILD.tcl -clean -name PRJ0 -skipBD -noIP
 #### Generate BD project only
-> cl;tclsh RUN_BUILD.tcl -clean -proj -name PRJ1
+> tclsh BUILD.tcl -clean -proj -name PRJ1
