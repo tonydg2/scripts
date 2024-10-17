@@ -47,7 +47,7 @@
 -name       : name of BD project, "-name \<project-name>". 
 
 ## Examples / Quick copies
-#### Build with BD project PRJO already generated, there are IP tcl files in IP folder not in use for this design (-noIP).
+#### Build with BD project PRJ0 already generated, there are IP tcl files in IP folder not in use for this design (-noIP).
 > cl;tclsh RUN_BUILD.tcl -clean -name PRJ0 -skipBD -noIP
 #### Generate BD project only
 > cl;tclsh RUN_BUILD.tcl -clean -proj -name PRJ1
