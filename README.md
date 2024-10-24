@@ -1,3 +1,5 @@
+TODO: -skipIMP and -skipSYN args will not create the output_products folder, need to check if exists first, create only if NOT exist
+
 ### No spaces allowed in any filenames or folders. Scripts will fail.
 
 # DFX
@@ -51,3 +53,7 @@
 > tclsh BUILD.tcl -clean -name PRJ0 -skipBD -noIP
 #### Generate BD project only
 > tclsh BUILD.tcl -clean -proj -name PRJ1
+#### Build with BD project PRJ2 already generated, only up to synth for review of synth dcp.
+> tclsh BUILD.tcl -clean -name PRJ2 -skipBD -noIP -skipIMP
+#### Build with BD project PRJ2 already generated, skip synth and use previous synth dcp (output_products) to continue with imp.
+> tclsh BUILD.tcl -clean -name PRJ2 -skipBD -noIP -skipSYN
