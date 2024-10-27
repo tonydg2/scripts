@@ -57,3 +57,5 @@ TODO: -skipIMP and -skipSYN args will not create the output_products folder, nee
 > tclsh BUILD.tcl -clean -name PRJ2 -skipBD -noIP -skipIMP
 #### Build with BD project PRJ2 already generated, skip synth and use previous synth dcp (output_products) to continue with imp.
 > tclsh BUILD.tcl -clean -name PRJ2 -skipBD -noIP -skipSYN
+#### Generate IP and IP project only
+> tclsh BUILD.tcl -clean -skipBD -skipRM -skipSYN -skipIMP
