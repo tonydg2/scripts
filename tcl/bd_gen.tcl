@@ -32,6 +32,23 @@ readVerilog $hdlDir/bd
 readVerilog $hdlDir/common 
 source $bdDir/$topBD.tcl
 
+
+#--------------------------------------------------------------------------------------------------
+# additional BD test  (reg_bd)
+#--------------------------------------------------------------------------------------------------
+source $bdDir/reg_bd.tcl
+
+set bdFile        ".srcs/sources_1/bd/reg_bd/reg_bd.bd"
+set wrapperFile   ".gen/sources_1/bd/reg_bd/hdl/reg_bd\_wrapper.v"
+
+make_wrapper -files [get_files $bdFile] -top
+read_verilog $wrapperFile
+set_property synth_checkpoint_mode None [get_files $bdFile]
+generate_target all [get_files $bdFile]
+set_property top [file rootname [file tail $wrapperFile]] [current_fileset]  
+
+
+
 #--------------------------------------------------------------------------------------------------
 # TODO: have option to to full in-memory build. Also build with already generated BD project:
 # in-memory : ".srcs/..."

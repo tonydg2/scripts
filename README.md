@@ -51,6 +51,8 @@ TODO: -skipIMP and -skipSYN args will not create the output_products folder, nee
 ## Examples / Quick copies
 #### Build with BD project PRJ0 already generated, there are IP tcl files in IP folder not in use for this design (-noIP).
 > tclsh BUILD.tcl -clean -name PRJ0 -skipBD -noIP
+#### Build with BD project PRJ0 already generated and IP already generated.
+> tclsh BUILD.tcl -clean -name PRJ0 -skipBD -skipIP
 #### Generate BD project only
 > tclsh BUILD.tcl -clean -proj -name PRJ1
 #### Build with BD project PRJ2 already generated, only up to synth for review of synth dcp.
@@ -59,3 +61,8 @@ TODO: -skipIMP and -skipSYN args will not create the output_products folder, nee
 > tclsh BUILD.tcl -clean -name PRJ2 -skipBD -noIP -skipSYN
 #### Generate IP and IP project only
 > tclsh BUILD.tcl -clean -skipBD -skipRM -skipSYN -skipIMP
+
+## NOTES
+#### Multiple BDs in the same project, but not BDCs. Each BD is instantiated independently in an upper level (top_io).
+In the project, must change each wrapper for each BD to "top", then generate output products for 
+each. This is handled in the scripts automatically if multiple BDs, as they're each set to top then generated.

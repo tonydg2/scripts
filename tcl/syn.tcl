@@ -60,6 +60,21 @@ foreach x $filesXDC {
 }
 
 #--------------------------------------------------------------------------------------------------
+# additional BD test (reg_bd)
+#--------------------------------------------------------------------------------------------------
+# in-memory or saved BD project
+if {$projName == "DEFAULT_PROJECT"} {
+  set bdFile        ".srcs/sources_1/bd/reg_bd/reg_bd.bd"
+  set wrapperFile   ".gen/sources_1/bd/reg_bd/hdl/reg_bd\_wrapper.v"
+} else {
+  set bdFile        "../$projName/$projName.srcs/sources_1/bd/reg_bd/reg_bd.bd"
+  set wrapperFile   "../$projName/$projName.gen/sources_1/bd/reg_bd/hdl/reg_bd\_wrapper.v"
+}
+
+read_bd $bdFile
+read_verilog $wrapperFile
+
+#--------------------------------------------------------------------------------------------------
 # read BD 
 #--------------------------------------------------------------------------------------------------
 # in-memory or saved BD project
