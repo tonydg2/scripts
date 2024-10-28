@@ -30,7 +30,7 @@ set_property SOURCE_MGMT_MODE All [current_project]
 
 readVerilog $hdlDir/bd 
 readVerilog $hdlDir/common 
-source $bdDir/$topBD.tcl
+##source $bdDir/$topBD.tcl
 
 
 #--------------------------------------------------------------------------------------------------
@@ -55,6 +55,8 @@ set_property top [file rootname [file tail $wrapperFile]] [current_fileset]
 # project   : ../$projName/$projName.srcs/...
 #   both need to work during later implementation...
 #--------------------------------------------------------------------------------------------------
+source $bdDir/$topBD.tcl
+
 set bdFile        ".srcs/sources_1/bd/$topBD/$topBD.bd"
 set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
 
