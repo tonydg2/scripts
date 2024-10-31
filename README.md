@@ -49,6 +49,8 @@ TODO: -skipIMP and -skipSYN args will not create the output_products folder, nee
 -name       : name of BD project, "-name \<project-name>". 
 
 ## Examples / Quick copies
+#### Build full design generating new BD project with name PRJ2, and generate IP in the ip folder. This would also build DFX partials if there were any present.
+> tclsh BUILD.tcl -clean -name PRJ2
 #### Build with BD project PRJ0 already generated, there are IP tcl files in IP folder not in use for this design (-noIP).
 > tclsh BUILD.tcl -clean -name PRJ0 -skipBD -noIP
 #### Generate BD project only
