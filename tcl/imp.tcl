@@ -106,6 +106,7 @@ if {$DFXrun && $staticDFX} { ;# skip this if empty static not desired for DFX pr
   write_bitstream   -force -no_partial_bitfile $outputDir/bit/static ;# static with empty RPs 
   write_checkpoint  -force $dcpDir/static_route.dcp ;# static with empty RPs 
   report_timing_summary -file $dcpDir/timing_summary_static_route.rpt
+  report_utilization    -file $dcpDir/utilization_static_route.rpt
 } elseif {!$DFXrun} { ;# non-DFX                                                                       
   puts "NON-DFX IMPLEMENTATION"
   place_n_route "top"                                                                  
@@ -116,6 +117,7 @@ if {$DFXrun && $staticDFX} { ;# skip this if empty static not desired for DFX pr
   write_bitstream   -force -no_partial_bitfile $outputDir/bit/top                            
   write_checkpoint  -force $dcpDir/top_route.dcp ;# complete checkpoint if non-DFX run 
   report_timing_summary -file $dcpDir/timing_summary_top_route.rpt
+  report_utilization    -file $dcpDir/utilization_top_route.rpt
 }
 
 # this may need updates - what if ILAs inside RPs...?
