@@ -1,5 +1,7 @@
 TODO: -skipIMP and -skipSYN args will not create the output_products folder, need to check if exists first, create only if NOT exist
 
+### Do NOT name the cloned scripts repo anything other than 'scripts'. Or modify BUILD.tcl.
+### Scripts repo/folder must be cloned at the top, otherwise git hash parsing will fail.
 ### No spaces allowed in any filenames or folders. Scripts will fail.
 
 # DFX

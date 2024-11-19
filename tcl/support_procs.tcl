@@ -83,17 +83,29 @@ proc getTimeStampXlnx {} {
 }
 
 #--------------------------------------------------------------------------------------------------
-# 
+# Get git hash from current dir, if a git repo. 64bits
 #--------------------------------------------------------------------------------------------------
 proc getGitHash {} {
   if {[catch {exec git rev-parse HEAD}]} {
-    set ghash_msb "GIT_ERROR"
+    puts "([pwd]) NOT A GIT REPO.\nGit hash will be set to FFFFFFFFFFFFFFFF"
+    set ghash_msb "FFFFFFFFFFFFFFFF"
   } else {
     set git_hash  [exec git rev-parse HEAD]
-    set ghash_msb [string range $git_hash 0 7]
+    set ghash_msb [string range $git_hash 0 15]
   }
   return [string toupper $ghash_msb]
 }
+
+# proc getGitHash {} {
+#   upvar git_hash git_hash
+#   if {[catch {exec git rev-parse HEAD}]} {
+#     set ghash_msb "DEADFFFF"
+#   } else {
+#     set git_hash  [exec git rev-parse HEAD]
+#     set ghash_msb [string range $git_hash 0 7]
+#   }
+#   return [string toupper $ghash_msb]
+# }
 
 #--------------------------------------------------------------------------------------------------
 # needs update or just remove, meh

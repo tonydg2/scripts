@@ -16,6 +16,14 @@ if {![file exist $VivadoPath]} {
   puts "ERROR - Check Vivado install path.\n\"$VivadoPath\" DOES NOT EXIST"
   exit
 }
+
+# verify correct dir or quit
+set curDir [pwd]
+if {[file tail $curDir] ne "scripts"} {
+  puts "Script must be sourced from the 'scripts' directory. You are in $curDir. Exiting." 
+  exit
+}
+
 source tcl/support_procs.tcl
 #--------------------------------------------------------------------------------------------------
 # set some vars for use in other sourced scripts
@@ -32,7 +40,7 @@ set bdDir       "../bd"
 set topBD       "top_bd"
 set projName    [getProjName]
 #--------------------------------------------------------------------------------------------------
-# DFX vars. These are auto-populated. DO NOT MODIFY.
+# DFX vars. These are auto-populated. DO NOT MODIFY. Not designed for nested DFX.
 #--------------------------------------------------------------------------------------------------
 set RMs ""    ;# List of all reconfigurable modules, organized per RP
 set RPs ""    ;# List of all reconfigurable partitions.
@@ -51,7 +59,16 @@ set buildTimeStamp [getTimeStamp $startTime]
 puts "\n*** BUILD TIMESTAMP: $buildTimeStamp ***\n"
 puts "TCL Version : $tcl_version"
 helpMsg 
+
+set git_hash ""
+# get git hash of scripts repo FIRST, function will update git_hash using upvar below with full
+# hash of top design repo, instead of scripts repo
+set ghash_msb_scripts [getGitHash]
+
+# get main repo git hash, up one dir. overwrite git_hash in the procedure
+cd ../
 set ghash_msb [getGitHash]
+cd $curDir
 
 if {("-proj" in $argv)} {set bdProjOnly TRUE} else {set bdProjOnly FALSE}
 if {("-sim" in $argv)} {set simProj TRUE} else {set simProj FALSE}
@@ -96,7 +113,7 @@ if {!("-skipSYN" in $argv) && !$bdProjOnly && !$simProj} {
 
 # P&R + bitsream(s)
 if {!("-skipIMP" in $argv) && !$bdProjOnly && !$simProj} {
-  vivadoCmd "imp.tcl" \"$RMs\" $dcpDir \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs
+  vivadoCmd "imp.tcl" \"$RMs\" $dcpDir \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs $git_hash $ghash_msb_scripts
 }
 
 # simulation project

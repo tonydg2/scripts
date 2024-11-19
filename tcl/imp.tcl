@@ -25,6 +25,8 @@ set RPlen     [lindex $argv 3]
 set outputDir [lindex $argv 4]
 set buildTime [lindex $argv 5]
 set MaxRMs    [lindex $argv 6]
+set git_hash  [lindex $argv 7]
+set ghash_msb_scripts [lindex $argv 8]
 
 set staticDFX false ;# temporary - run empty static build for DFX runs? arg for this option?
 
@@ -98,23 +100,35 @@ if {$DFXrun && $staticDFX} { ;# skip this if empty static not desired for DFX pr
       incr idx
     }
   }
-  lock_design -level routing                                                        
-  set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
-  source ./tcl/load_git_hash.tcl                                                             
-  set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
+  lock_design -level routing
+  set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]
+  source ./tcl/load_git_hash.tcl
+  set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
   if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit}
   write_bitstream   -force -no_partial_bitfile $outputDir/bit/static ;# static with empty RPs 
   write_checkpoint  -force $dcpDir/static_route.dcp ;# static with empty RPs 
   report_timing_summary -file $dcpDir/timing_summary_static_route.rpt
   report_utilization    -file $dcpDir/utilization_static_route.rpt
-} elseif {!$DFXrun} { ;# non-DFX                                                                       
+} elseif {!$DFXrun} { ;# non-DFX
   puts "NON-DFX IMPLEMENTATION"
-  place_n_route "top"                                                                  
-  set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*]                  
-  source ./tcl/load_git_hash.tcl                                                             
-  set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]                   
+  place_n_route "top"
+  
+  puts "\n\n---FIRST GIT HASH----$git_hash\n\n"
+  set ::git_hash_load $git_hash
+  set githash_cells_path [get_cells -hierarchical *user_init_64b_inst*] ;# BD version
+  source ./tcl/load_git_hash.tcl
+  set githash_cells_path [get_cells -hierarchical *git_hash_top_inst*] ;# top version
+  source ./tcl/load_git_hash.tcl
+  
+  puts "\n\n---2nd GIT HASH----$ghash_msb_scripts\n\n"
+  set ::git_hash_load $ghash_msb_scripts
+  #set ::git_hash_load [append ghash_msb_scripts "00000000"]
+  set githash_cells_path [get_cells -hierarchical *git_hash_scripts_inst*] ;# scripts version
+  source ./tcl/load_git_hash.tcl
+
+  set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
   if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit}
-  write_bitstream   -force -no_partial_bitfile $outputDir/bit/top                            
+  write_bitstream   -force -no_partial_bitfile $outputDir/bit/top
   write_checkpoint  -force $dcpDir/top_route.dcp ;# complete checkpoint if non-DFX run 
   report_timing_summary -file $dcpDir/timing_summary_top_route.rpt
   report_utilization    -file $dcpDir/utilization_top_route.rpt
