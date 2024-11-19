@@ -1,8 +1,8 @@
 #
 
-puts "Retrieved git hash: $::git_hash_load"
-set ghash_msb [string range $::git_hash_load 0 7]
-set ghash_lsb [string range $::git_hash_load 8 15]
+puts "Retrieved git hash: $git_hash_load"
+set ghash_msb [string range $git_hash_load 0 7]
+set ghash_lsb [string range $git_hash_load 8 15]
 puts "Partial git hash to load: $ghash_msb$ghash_lsb"
 #scan %x: read hex val, set as int
 set ghash_msb [scan $ghash_msb %x]

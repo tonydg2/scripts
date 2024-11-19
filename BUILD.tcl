@@ -39,6 +39,18 @@ set dcpDir      "$outputDir/dcp"
 set bdDir       "../bd"
 set topBD       "top_bd"
 set projName    [getProjName]
+
+# Git hashes for every instance of user_init_64b.
+# Format is "git_hash, instance name, path to repo". Leave git_hash as empty string here, it gets 
+# populated by updateVersionInfo proc
+set versionInfo [list \
+  {"" git_hash_top_inst         ../              }\
+  {"" version_bd_inst           ../              }\
+  {"" git_hash_scripts_inst     ./               }\
+  {"" version_click_uart_inst   ../sub/click_uart}\
+  {"" version_click_lcd_inst    ../sub/click_lcd }
+]
+
 #--------------------------------------------------------------------------------------------------
 # DFX vars. These are auto-populated. DO NOT MODIFY. Not designed for nested DFX.
 #--------------------------------------------------------------------------------------------------
@@ -59,16 +71,10 @@ set buildTimeStamp [getTimeStamp $startTime]
 puts "\n*** BUILD TIMESTAMP: $buildTimeStamp ***\n"
 puts "TCL Version : $tcl_version"
 helpMsg 
+updateVersionInfo ;# populate git hashes
 
-set git_hash ""
-# get git hash of scripts repo FIRST, function will update git_hash using upvar below with full
-# hash of top design repo, instead of scripts repo
-set ghash_msb_scripts [getGitHash]
-
-# get main repo git hash, up one dir. overwrite git_hash in the procedure
-cd ../
-set ghash_msb [getGitHash]
-cd $curDir
+# leave this in for now, fix/remove later, need to update outputDirGen and buildTimeEnd procs
+set ghash_msb [string range [lindex [lindex $versionInfo 0] 0] 0 7]
 
 if {("-proj" in $argv)} {set bdProjOnly TRUE} else {set bdProjOnly FALSE}
 if {("-sim" in $argv)} {set simProj TRUE} else {set simProj FALSE}
@@ -113,7 +119,7 @@ if {!("-skipSYN" in $argv) && !$bdProjOnly && !$simProj} {
 
 # P&R + bitsream(s)
 if {!("-skipIMP" in $argv) && !$bdProjOnly && !$simProj} {
-  vivadoCmd "imp.tcl" \"$RMs\" $dcpDir \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs $git_hash $ghash_msb_scripts
+  vivadoCmd "imp.tcl" \"$RMs\" $dcpDir \"$RPs\" $RPlen $outputDir $buildTimeStamp $MaxRMs \"$versionInfo\"
 }
 
 # simulation project

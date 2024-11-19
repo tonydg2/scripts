@@ -96,16 +96,21 @@ proc getGitHash {} {
   return [string toupper $ghash_msb]
 }
 
-# proc getGitHash {} {
-#   upvar git_hash git_hash
-#   if {[catch {exec git rev-parse HEAD}]} {
-#     set ghash_msb "DEADFFFF"
-#   } else {
-#     set git_hash  [exec git rev-parse HEAD]
-#     set ghash_msb [string range $git_hash 0 7]
-#   }
-#   return [string toupper $ghash_msb]
-# }
+#--------------------------------------------------------------------------------------------------
+# Populates the versionInfo list with git hashes
+#--------------------------------------------------------------------------------------------------
+proc updateVersionInfo {} {
+  upvar versionInfo versionInfo
+  set idx 0;
+  foreach vList $versionInfo {
+    set curDir [pwd]
+    cd [lindex $vList 2]
+    set ghash [getGitHash]
+    lset versionInfo $idx [lset vList 0 $ghash]
+    incr idx 
+    cd $curDir
+  }
+}
 
 #--------------------------------------------------------------------------------------------------
 # needs update or just remove, meh
