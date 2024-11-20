@@ -80,5 +80,19 @@ read_verilog $wrapperFile
 
 synth_design -top $topEntity -part $partNum
 if {!($RPs=="")} {foreach {ignore RP} $RPs {set_property HD.RECONFIGURABLE true [get_cells $RP\_inst]}}
+
+
+set initFF_data "AB5F0077"
+set initFF_cells_path [get_cells -hierarchical *timestamp_scripts_inst*]
+source ./tcl/initFF32.tcl
+set initFF_cells_path [get_cells -hierarchical *time_stamp_top_inst*]
+source ./tcl/initFF32.tcl
+set initFF_cells_path [get_cells -hierarchical *time_stamp_click_uart_inst*]
+source ./tcl/initFF32.tcl
+set initFF_cells_path [get_cells -hierarchical *time_stamp_click_lcd_inst*]
+source ./tcl/initFF32.tcl
+
+
+
 write_checkpoint -force $dcpDir/top_synth.dcp
 

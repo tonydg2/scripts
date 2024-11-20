@@ -127,15 +127,16 @@ if {$DFXrun && $staticDFX} { ;# skip this if empty static not desired for DFX pr
     #source ./tcl/load_git_hash.tcl
     source ./tcl/initFF64.tcl
   }
-  set initFF_data $buildTime
-  set initFF_cells_path [get_cells -hierarchical *timestamp_scripts_inst*]
-  source ./tcl/initFF32.tcl
-  set initFF_cells_path [get_cells -hierarchical *time_stamp_top_inst*]
-  source ./tcl/initFF32.tcl
-  set initFF_cells_path [get_cells -hierarchical *time_stamp_click_uart_inst*]
-  source ./tcl/initFF32.tcl
-  set initFF_cells_path [get_cells -hierarchical *time_stamp_click_lcd_inst*]
-  source ./tcl/initFF32.tcl
+
+#  set initFF_data $buildTime
+#  set initFF_cells_path [get_cells -hierarchical *timestamp_scripts_inst*]
+#  source ./tcl/initFF32.tcl
+#  set initFF_cells_path [get_cells -hierarchical *time_stamp_top_inst*]
+#  source ./tcl/initFF32.tcl
+#  set initFF_cells_path [get_cells -hierarchical *time_stamp_click_uart_inst*]
+#  source ./tcl/initFF32.tcl
+#  set initFF_cells_path [get_cells -hierarchical *time_stamp_click_lcd_inst*]
+#  source ./tcl/initFF32.tcl
 
 
   set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
