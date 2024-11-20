@@ -120,11 +120,23 @@ if {$DFXrun && $staticDFX} { ;# skip this if empty static not desired for DFX pr
   place_n_route "top"
   
   foreach verList $versionInfo {
-    set git_hash_load [lindex $verList 0]
-    set githash_cells_path [get_cells -hierarchical *[lindex $verList 1]*]
-    puts "\n** $githash_cells_path **\n"
-    source ./tcl/load_git_hash.tcl
+    #set git_hash_load [lindex $verList 0]
+    set initFF_data  [lindex $verList 0]
+    #set githash_cells_path [get_cells -hierarchical *[lindex $verList 1]*]
+    set initFF_cells_path [get_cells -hierarchical *[lindex $verList 1]*]
+    #source ./tcl/load_git_hash.tcl
+    source ./tcl/initFF64.tcl
   }
+  set initFF_data $buildTime
+  set initFF_cells_path [get_cells -hierarchical *timestamp_scripts_inst*]
+  source ./tcl/initFF32.tcl
+  set initFF_cells_path [get_cells -hierarchical *time_stamp_top_inst*]
+  source ./tcl/initFF32.tcl
+  set initFF_cells_path [get_cells -hierarchical *time_stamp_click_uart_inst*]
+  source ./tcl/initFF32.tcl
+  set initFF_cells_path [get_cells -hierarchical *time_stamp_click_lcd_inst*]
+  source ./tcl/initFF32.tcl
+
 
   set_property BITSTREAM.CONFIG.USR_ACCESS $buildTime [current_design]
   if {![file exists $outputDir/bit]} {file mkdir $outputDir/bit}
