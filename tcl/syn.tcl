@@ -50,6 +50,11 @@ if {!$noIP} {
 # empty black box.
 read_verilog $hdlDir/top/$topEntity.sv 
 
+#*** VHDL *** FIX!
+  read_vhdl -vhdl2008 $hdlDir/spi3.vhd 
+  read_vhdl -vhdl2008 $hdlDir/spi4.vhd 
+#************
+
 readVerilog $hdlDir
 readVerilog $hdlDir/bd 
 readVerilog $hdlDir/common 
