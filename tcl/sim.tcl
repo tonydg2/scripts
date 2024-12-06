@@ -1,4 +1,6 @@
 
+# three input args to this proc, dir is required, lib and tb are not required, 
+# will default to 'work' and 'FALSE' if not provided
 proc readVhdl {dir {lib work} {tb FALSE}} {
   set     files     [glob -nocomplain -tails -directory $dir *.vhd]
   foreach x $files {
@@ -23,7 +25,7 @@ proc readVerilog {dir {tb FALSE}} {
 
 set hdlDir    [lindex $argv 0]
 set partNum   [lindex $argv 1]
-set simDir    [lindex $argv 2]
+set tbDir     [lindex $argv 2]
 set projName  [lindex $argv 3]
 
 create_project $projName -part $partNum -in_memory
@@ -34,10 +36,14 @@ set_property SOURCE_MGMT_MODE All [current_project]
 
 readVerilog $hdlDir/common 
 readVerilog $hdlDir
-readVerilog $simDir TRUE
+readVerilog $tbDir TRUE
 
-readVhdl $hdlDir crc_lib
-readVhdl $simDir sim TRUE
+#readVhdl $hdlDir crc_lib
+#readVhdl $tbDir sim TRUE
+
+set ipDir "../ip"
+set xciRootName "fir0"
+read_ip $ipDir/$xciRootName/$xciRootName.xci
 
 
 set_property -name {xsim.simulate.log_all_signals} -value {true} -objects [get_filesets sim_1]
