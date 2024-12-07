@@ -1,61 +1,101 @@
-#!/usr/bin/env tclsh
 
-# Function to convert decimal numbers to hexadecimal strings with fixed digit length
-proc dec2hex {digits num} {
-    return [format "%0${digits}X" $num]
+# read taps, convert to hex in Xilinx coe format
+# also output print spacing
+
+
+# Open the file in read mode
+set fileName "taps.coe"
+set fid [open $fileName r]
+set foutid [open "tapsXil.coe" w]
+
+puts $foutid "radix=16;"
+puts $foutid "coefdata="
+
+set prevLine ""
+# Read and print each line
+while {[gets $fid line] >= 0} {
+  if {$prevLine ne ""} {
+    puts $foutid $prevLine,
+  }
+  set tap [expr $line * (2**31 - 1)]
+  set tapRnd [::tcl::mathfunc::round $tap]
+  set tapRnd [expr {$tapRnd & 0xFFFFFFFF}] ;# forces 32bit val
+  set tapHex [format "%08x" $tapRnd]
+  #puts "$line\t=\t$tapRnd\t=\t0x$tapHex"
+  #puts [format "Value1 = %-15s Value2 = %-15s Value3 = %-15s" $val1 $val2 $val3]
+  #set outVal [format "Value1 = %-22s Value2 = %-12s Value3 = %-10s" $line $tapRnd $tapHex]
+  set outVal [format "%-22s = %-12s = 0x%-12s" $line $tapRnd $tapHex]
+  puts $outVal
+  set prevLine $tapHex
+  #puts $foutid $tapHex,
+  #puts [format "%-15s" $line]
 }
 
-# Get the current time
-set now [clock seconds]
-
-# Extract date and time components and convert to integers
-scan [clock format $now -format %d] %d dayNum
-scan [clock format $now -format %m] %d monthNum
-scan [clock format $now -format %Y] %d yearNum
-scan [clock format $now -format %H] %d hourNum
-scan [clock format $now -format %M] %d minuteNum
-scan [clock format $now -format %S] %d secondNum
-
-# Adjust the components as per your requirements
-set day    [expr {$dayNum - 1}]        ;# Days from 0 to 30 (5 bits)
-set month  [expr {$monthNum - 1}]      ;# Months from 0 to 11 (4 bits)
-set year   [expr {$yearNum - 2000}]    ;# Years from 0 to 63 (6 bits)
-set hour   $hourNum                    ;# Hours from 0 to 23 (5 bits)
-set minute $minuteNum                  ;# Minutes from 0 to 59 (6 bits)
-set second $secondNum                  ;# Seconds from 0 to 59 (6 bits)
-
-# Ensure all values are within their expected ranges
-foreach {var maxVal} {
-    day    30
-    month  11
-    year   63
-    hour   23
-    minute 59
-    second 59
-} {
-    if {[set $var] > $maxVal || [set $var] < 0} {
-        error "$var is out of range (0-$maxVal)"
-    }
+if {$prevLine ne ""} {
+  puts $foutid $prevLine\;
 }
 
-# Combine components into a 32-bit value (masks and shifts)
-set dayShift    [expr {($day    & 0x1F) << 27}]   # Mask 5 bits for day and shift left by 27
-set monthShift  [expr {($month  & 0xF)  << 23}]   # Mask 4 bits for month and shift left by 23
-set yearShift   [expr {($year   & 0x3F) << 17}]   # Mask 6 bits for year and shift left by 17
-set hourShift   [expr {($hour   & 0x1F) << 12}]   # Mask 5 bits for hour and shift left by 12
-set minuteShift [expr {($minute & 0x3F) << 6}]    # Mask 6 bits for minute and shift left by 6
-set secondShift [expr {($second & 0x3F)}]         # Mask 6 bits for second (no shift)
 
-# Combine all the shifted values into a final 32-bit value
-set finalValue [expr {
-    $dayShift |
-    $monthShift |
-    $yearShift |
-    $hourShift |
-    $minuteShift |
-    $secondShift
-}]
+#puts $foutid ";"
+# Close the file
+close $fid
+close $foutid
+exit
+################################################################################
+# Open the file in read mode
+set fileName "taps.coe"
+set fid [open $fileName r]
+set foutid [open "tapsXil.coe" w]
 
-# Output the combined 32-bit hexadecimal value
-puts "Combined 32-bit Hexadecimal Value:"
-puts [format "%08X" $finalValue]
+puts $foutid "radix=16;"
+puts $foutid "coefdata="
+
+# Read and print each line
+while {[gets $fid line] >= 0} {
+    set tap [expr $line * (2**31 - 1)]
+    set tapRnd [::tcl::mathfunc::round $tap]
+    set tapRnd [expr {$tapRnd & 0xFFFFFFFF}] ;# forces 32bit val
+    set tapHex [format "%08x" $tapRnd]
+    #puts "$line\t=\t$tapRnd\t=\t0x$tapHex"
+    #puts [format "Value1 = %-15s Value2 = %-15s Value3 = %-15s" $val1 $val2 $val3]
+    
+    #set outVal [format "Value1 = %-22s Value2 = %-12s Value3 = %-10s" $line $tapRnd $tapHex]
+    set outVal [format "%-22s = %-12s = 0x%-12s" $line $tapRnd $tapHex]
+    puts $outVal
+    puts $foutid $tapHex,
+    #puts [format "%-15s" $line]
+}
+puts $foutid ";"
+# Close the file
+close $fid
+close $foutid
+exit
+
+################################################################################
+set line 0.000025549578317879
+
+set tap [expr $line * (2**31 - 1)]
+
+puts $tap
+set tap 54867.50162539092
+set tapabs [::tcl::mathfunc::round $tap]
+puts $tapabs
+
+exit
+################################################################################
+
+
+# Open the file in read mode
+set fileName "example.txt"
+set fid [open $fileName r]
+
+# Read and print each line until EOF
+while {![eof $fid]} {
+    set line [gets $fid]
+    puts $line
+}
+
+# Close the file
+close $fid
+
+
