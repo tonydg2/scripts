@@ -9,7 +9,7 @@
 # Top level build script
 # > tclsh RUN_BUILD.tcl
 
-set VivadoPath "/opt/xilinx/Vivado/2023.2"
+set VivadoPath "/opt/xilinx/Vivado/2024.1"
 
 set VivadoSettingsFile $VivadoPath/settings64.sh
 if {![file exist $VivadoPath]} {
