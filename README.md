@@ -1,3 +1,8 @@
+#### MODIFIED FOR v2018.3
+PROBLEMS!: Issue generating BD in full script. 
+  Temp sol'n: Generate BD project only first, open project and generate output products. Then run build with -skipBD.
+
+
 TODO: -skipIMP and -skipSYN args will not create the output_products folder, need to check if exists first, create only if NOT exist
 
 ### No spaces allowed in any filenames or folders. Scripts will fail.

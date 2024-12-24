@@ -39,14 +39,24 @@ source $bdDir/$topBD.tcl
 #   both need to work during later implementation...
 #--------------------------------------------------------------------------------------------------
 set bdFile        ".srcs/sources_1/bd/$topBD/$topBD.bd"
-set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+#set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+# for v2018.3:
+set wrapperFile   ".srcs/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
 
 make_wrapper -files [get_files $bdFile] -top
 read_verilog $wrapperFile
-set_property synth_checkpoint_mode None [get_files $bdFile]
-generate_target all [get_files $bdFile]
+  #set_property synth_checkpoint_mode None [get_files $bdFile]
+#set_property synth_checkpoint_mode Hierarchical [get_files $bdFile] ;# None = global, Hierarchical = OOC per IP. NEED TO TEST/VERIFY : not for non-project
+#generate_target all [get_files $bdFile] -force ;# did force break something?
+  #generate_target all [get_files $bdFile] -force 
 set_property top [file rootname [file tail $wrapperFile]] [current_fileset]  
 
 # if no -name arg is provided, BD proj not saved
-if {!($projName == "DEFAULT_PROJECT")} {save_project_as $projName ../$projName -force}
+#if {!($projName == "DEFAULT_PROJECT")} {save_project_as $projName ../$projName -force}
+if {!($projName == "DEFAULT_PROJECT")} {
+  save_project_as $projName ../$projName -force
+  set bdFile "../$projName/$projName.srcs/sources_1/bd/$topBD/$topBD.bd"
+  set_property synth_checkpoint_mode Hierarchical [get_files $bdFile]
+  generate_target all [get_files $bdFile] -force
+}
 

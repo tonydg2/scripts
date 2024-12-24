@@ -65,14 +65,22 @@ foreach x $filesXDC {
 # in-memory or saved BD project
 if {$projName == "DEFAULT_PROJECT"} {
   set bdFile        ".srcs/sources_1/bd/$topBD/$topBD.bd"
-  set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+  #set wrapperFile   ".gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+  # for v2018.3:
+  set wrapperFile   ".srcs/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
 } else {
   set bdFile        "../$projName/$projName.srcs/sources_1/bd/$topBD/$topBD.bd"
-  set wrapperFile   "../$projName/$projName.gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+  #set wrapperFile   "../$projName/$projName.gen/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
+  # for v2018.3:
+  set wrapperFile   "../$projName/$projName.srcs/sources_1/bd/$topBD/hdl/$topBD\_wrapper.v"
 }
 
 read_bd $bdFile
 read_verilog $wrapperFile
+
+
+read_verilog "../$projName/$projName.srcs/sources_1/bd/top_bd/ip/top_bd_v_tpg_0_0/hdl/verilog/top_bd_v_tpg_0_0_v_tpg.v"
+#/mnt/TDG_512/projects/1_ultra96_dp_24_1/PRJ2/PRJ2.srcs/sources_1/bd/top_bd/ip/top_bd_v_tpg_0_0/synth/top_bd_v_tpg_0_0.v
 
 #--------------------------------------------------------------------------------------------------
 # synth 
@@ -80,5 +88,7 @@ read_verilog $wrapperFile
 
 synth_design -top $topEntity -part $partNum
 if {!($RPs=="")} {foreach {ignore RP} $RPs {set_property HD.RECONFIGURABLE true [get_cells $RP\_inst]}}
+
+if {![file exists $dcpDir]} {file mkdir $dcpDir} ;# needed for v2018.3
 write_checkpoint -force $dcpDir/top_synth.dcp
 
