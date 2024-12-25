@@ -79,7 +79,7 @@ read_bd $bdFile
 read_verilog $wrapperFile
 
 
-read_verilog "../$projName/$projName.srcs/sources_1/bd/top_bd/ip/top_bd_v_tpg_0_0/hdl/verilog/top_bd_v_tpg_0_0_v_tpg.v"
+#read_verilog "../$projName/$projName.srcs/sources_1/bd/top_bd/ip/top_bd_v_tpg_0_0/hdl/verilog/top_bd_v_tpg_0_0_v_tpg.v"
 #/mnt/TDG_512/projects/1_ultra96_dp_24_1/PRJ2/PRJ2.srcs/sources_1/bd/top_bd/ip/top_bd_v_tpg_0_0/synth/top_bd_v_tpg_0_0.v
 
 #--------------------------------------------------------------------------------------------------
