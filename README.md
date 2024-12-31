@@ -25,5 +25,5 @@ flowchart TD
 ```
 
 ```mermaid
-  ![Image Alt](diagram1.pdf/photo.pdf)
+  ![Image Alt](./diagram1.pdf)
 ```
