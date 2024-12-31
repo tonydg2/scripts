@@ -43,6 +43,48 @@ proc getProjName {} {
 }
 
 #--------------------------------------------------------------------------------------------------
+# BD tcl script name follows directly after '-BDtcl' input arg
+#--------------------------------------------------------------------------------------------------
+proc getBDtclName {} {
+  upvar argv argv
+  upvar argc argc
+  set defaultBDtclName "top_bd"
+  if {"-BDtcl" in $argv} {
+    set BDtclNameIdx [lsearch $argv "-BDtcl"]
+    set BDtclNameIdx [expr $BDtclNameIdx + 1]
+    if {$BDtclNameIdx == $argc} {
+      set BDtclName $defaultBDtclName
+    } else {
+      set BDtclName [lindex $argv $BDtclNameIdx]
+    }
+  } else {
+    set BDtclName $defaultBDtclName
+  }
+  return $BDtclName
+}
+
+#--------------------------------------------------------------------------------------------------
+# BD name follows directly after '-BDName' input arg
+#--------------------------------------------------------------------------------------------------
+proc getBDName {} {
+  upvar argv argv
+  upvar argc argc
+  set defaultBDName "top_bd"
+  if {"-BDName" in $argv} {
+    set BDNameIdx [lsearch $argv "-BDName"]
+    set BDNameIdx [expr $BDNameIdx + 1]
+    if {$BDNameIdx == $argc} {
+      set BDName $defaultBDName
+    } else {
+      set BDName [lindex $argv $BDNameIdx]
+    }
+  } else {
+    set BDName $defaultBDName
+  }
+  return $BDName
+}
+
+#--------------------------------------------------------------------------------------------------
 # 
 #--------------------------------------------------------------------------------------------------
 proc buildTimeEnd {} {

@@ -20,6 +20,7 @@ set partNum   [lindex $argv 1]
 set bdDir     [lindex $argv 2]
 set projName  [lindex $argv 3]
 set topBD     [lindex $argv 4]
+set topBDtcl  [lindex $argv 5]
 
 #set_part $partNum ;# might not need this
 create_project $projName -part $partNum -in_memory
@@ -30,7 +31,7 @@ set_property SOURCE_MGMT_MODE All [current_project]
 
 readVerilog $hdlDir/bd 
 readVerilog $hdlDir/common 
-source $bdDir/$topBD.tcl
+source $bdDir/$topBDtcl.tcl
 
 #--------------------------------------------------------------------------------------------------
 # TODO: have option to to full in-memory build. Also build with already generated BD project:
