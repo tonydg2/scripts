@@ -23,3 +23,7 @@ flowchart TD
         BD
     end
 ```
+
+```mermaid
+  ![Image Alt](diagram1.pdf/photo.pdf)
+```
