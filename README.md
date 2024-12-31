@@ -25,4 +25,4 @@ flowchart TD
 ```
 
 
-![Image Alt](./diagram1.pdf)
+![Image Alt](./diagram1.png)
