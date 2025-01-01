@@ -46,7 +46,14 @@ TODO: -skipIMP and -skipSYN args will not create the output_products folder, nee
 
 -proj       : generate BD project only. must be run with -name option.
 
--name       : name of BD project, "-name \<project-name>". 
+-name       : name of BD project to be generated, "-name \<project-name>". Independent of BD name 
+              and BD tcl script name.
+
+-BDtcl      : name of BD tcl script. "-BDtcl \<bd-script-name>". Default is "top_bd" if not provided.
+              Generally for debug and future. Script name doesn't need to match BD name defined 
+              within the script.
+
+-BDName     : name of BD within tcl script. "-BDname \<bd-name>". Default is "top_bd" if not provided.
 
 ## Examples / Quick copies
 #### Build full design generating new BD project with name PRJ2, and generate IP in the ip folder. This would also build DFX partials if there were any present.

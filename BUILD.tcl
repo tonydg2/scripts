@@ -29,7 +29,8 @@ set xdcDir      "../xdc"
 set outputDir   "../output_products"
 set dcpDir      "$outputDir/dcp"
 set bdDir       "../bd"
-set topBD       "top_bd"
+set topBD       [getBDName]     ;# default = "top_bd"
+set topBDtcl    [getBDtclName]  ;# default = "top_bd" for top_bd.tcl
 set projName    [getProjName]
 #--------------------------------------------------------------------------------------------------
 # DFX vars. These are auto-populated. DO NOT MODIFY.
@@ -75,7 +76,7 @@ if {"-cleanIP" in $argv} {cleanIP}
 #--------------------------------------------------------------------------------------------------
 # Generate BD
 if {!("-skipBD" in $argv) && !$simProj} {
-  vivadoCmd "bd_gen.tcl" $hdlDir $partNum $bdDir $projName $topBD
+  vivadoCmd "bd_gen.tcl" $hdlDir $partNum $bdDir $projName $topBD $topBDtcl
 }
 
 # Generate non-BD IP
