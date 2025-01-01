@@ -55,6 +55,8 @@ TODO: -skipIMP and -skipSYN args will not create the output_products folder, nee
 
 -BDName     : name of BD within tcl script. "-BDname \<bd-name>". Default is "top_bd" if not provided.
 
+-verbose    : print script tcl for debug. prevent usage of -notrace for vivado commands.
+
 ## Examples / Quick copies
 #### Build full design generating new BD project with name PRJ2, and generate IP in the ip folder. This would also build DFX partials if there were any present.
 > tclsh BUILD.tcl -clean -name PRJ2
